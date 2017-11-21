@@ -7,6 +7,7 @@
 #include <time.h>
 
 #include "Integrator.h"
+#include "GenerateAtom.h"
 
 using namespace std;
 
@@ -71,9 +72,9 @@ int main()
 	vector<double> v1;
 	vector<double> atomsMass1;
 	vector<double> atomsCharge1(2);
-	atomsCharge1[0] = -1.0e0;
-	atomsCharge1[1] = 1.0e0;
-	generateInitialPositionAndVelocity(x1, v1, atomsMass1);
+//	atomsCharge1[0] = -1.0e0;
+//	atomsCharge1[1] = 1.0e0;
+//	generateInitialPositionAndVelocity(x1, v1, atomsMass1);
 	vector<double> x2;
 	vector<double> v2;
 	vector<double> atomsMass2;
@@ -82,23 +83,36 @@ int main()
 	atomsCharge2[1] = 1.0e0;
 	generateInitialPositionAndVelocity(x2, v2, atomsMass2);
 
+	GenerateAtom genAtom_(21);
+	genAtom_.generateInitialPositionAndVelocity(x1, v1, atomsMass1, atomsCharge1);
+
 	// translade cm1 -10x e 1y.
-	x1[0] -= 5.0e0;
-	x1[1] -= 5.0e0;
-	x1[2] += 2.0e0;
-	x1[3] += 2.0e0;
-	v1[0] += 0.001e0;
-	v1[1] += 0.001e0;
-	v2[0] -= 0.001e0;
-	v2[1] -= 0.001e0;
 
 	printCoulombAtoms(x1, "printInitial.xyz", atomsCharge1);
 	printCoulombAtoms(x2, "printInitial.xyz", atomsCharge2);
 
+	vector<double> x, v, atomsMass, atomsCharge;
+	genAtom_.generateTwoRandomAtoms(x, v, atomsMass, atomsCharge);
+	x[0] -= 5.0e0;
+	x[1] -= 5.0e0;
+	x[4] += 2.0e0;
+	x[5] += 2.0e0;
+	v[0] += 0.005e0;
+	v[1] += 0.005e0;
+	v[2] -= 0.005e0;
+	v[3] -= 0.005e0;
+
+	/*
 	vector<double> x(12);
 	vector<double> v(12);
 	vector<double> atomsMass(12);
 	vector<double> atomsCharge(4);
+	x = genAtom_.addAtom(x1, x2);
+	v = genAtom_.addAtom(v1, v2);
+	atomsMass = genAtom_.addAtom(atomsMass1, atomsMass2);
+	atomsCharge = genAtom_.insertVector(atomsCharge1, atomsCharge2);
+	*/
+	/*
 	x[0] = x1[0];
 	x[1] = x1[1];
 	x[2] = x2[0];
@@ -139,7 +153,7 @@ int main()
 	atomsCharge[1] = atomsCharge1[1];
 	atomsCharge[2] = atomsCharge2[0];
 	atomsCharge[3] = atomsCharge2[1];
-
+	*/
 	printCoulombAtoms(x, "printInitial.xyz", atomsCharge);
 
 	translateToCenterOfMass(x, atomsMass);
@@ -152,21 +166,16 @@ int main()
 	remove("simulacao.xyz");
 	printCoulombAtoms(x, "simulacao.xyz", atomsCharge);
 	int iterationsLoop = 10;
-	int printLoop = 15000;
+	int printLoop = 1500;
 	int maxIterations = printLoop * iterationsLoop;
 	for (int i = 0; i < printLoop;i++)
 	{
 		for (int j = 0; j < iterationsLoop; j++)
 		{
-			rk_.rungeKuttaSimetrico(x, v, 0.01);
+			rk_.rungeKuttaSimetrico(x, v, 0.1);
 		}
 		cout << 100 * i / printLoop << " %" << endl; ;
 		printCoulombAtoms(x, "simulacao.xyz", atomsCharge);
-		for (int i = 0; i < 12; i++)
-		{
-			if ((x[i] > 7.0e0) || (x[i] < -7.0e0))
-				v[i] *= -1.0e0;
-		}
 	}
 
 	return 0;
@@ -311,6 +320,7 @@ void printCoulombAtoms(vector<double> & atoms, string testName, vector<double> &
 
 /*
 DIDNT WORKED
+MANUALLY REDUCE SPEED
 double normV1 = sqrt(v[0] * v[0] + v[4] * v[4] + v[8] * v[8]);
 if (normV1 > 10.0e0)
 {
@@ -324,6 +334,13 @@ if (normV2 > 10.0e0)
 v[2] *= 0.99;
 v[6] *= 0.99;
 v[10] *= 0.99;
+}
+
+BOX
+for (int i = 0; i < 12; i++)
+{
+if ((x[i] > 7.0e0) || (x[i] < -7.0e0))
+v[i] *= -1.0e0;
 }
 
 */
