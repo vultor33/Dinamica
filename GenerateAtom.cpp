@@ -61,6 +61,92 @@ void GenerateAtom::generateTwoRandomAtoms(
 	atomCharge = insertVector(aC1, aC2);
 }
 
+void GenerateAtom::generateTwoSymmetricAtoms(
+	std::vector<double> &xPositions,
+	std::vector<double> &vVelocities,
+	std::vector<double> &atomsMass,
+	std::vector<double> &atomCharge)
+{
+	vector<double> x1, x2, v1, v2, aM1, aM2, aC1, aC2;
+	generateInitialPositionAndVelocity(x1, v1, aM1, aC1);
+	x2 = x1;
+	v2 = v1;
+	aM2 = aM1;
+	aC2 = aC1;
+	for (size_t i = 0; i < x1.size(); i++)
+	{
+		x2[i] *= -1.0e0;
+	}
+	xPositions = addAtom(x1, x2);
+	vVelocities = addAtom(v1, v2);
+	atomsMass = addAtom(aM1, aM2);
+	atomCharge = insertVector(aC1, aC2);
+}
+
+void GenerateAtom::generateTwoIdenticalSymmetricAtoms(
+	std::vector<double> &xPositions,
+	std::vector<double> &vVelocities,
+	std::vector<double> &atomsMass,
+	std::vector<double> &atomCharge)
+{
+	vector<double> x1, x2, v1, v2, aM1, aM2, aC1, aC2;
+	generateInitialPositionAndVelocity(x1, v1, aM1, aC1);
+	x2 = x1;
+	v2 = v1;
+	aM2 = aM1;
+	aC2 = aC1;
+	xPositions = addAtom(x1, x2);
+	vVelocities = addAtom(v1, v2);
+	atomsMass = addAtom(aM1, aM2);
+	atomCharge = insertVector(aC1, aC2);
+}
+
+
+void GenerateAtom::generateTwoAntiSymmetricAtoms(
+	std::vector<double> &xPositions,
+	std::vector<double> &vVelocities,
+	std::vector<double> &atomsMass,
+	std::vector<double> &atomCharge)
+{
+	vector<double> x1, x2, v1, v2, aM1, aM2, aC1, aC2;
+	generateInitialPositionAndVelocity(x1, v1, aM1, aC1);
+	x2 = x1;
+	v2 = v1;
+	aM2 = aM1;
+	aC2 = aC1;
+	for (size_t i = 0; i < x1.size(); i++)
+	{
+		x2[i] *= -1.0e0;
+		v2[i] *= -1.0e0;
+	}
+	xPositions = addAtom(x1, x2);
+	vVelocities = addAtom(v1, v2);
+	atomsMass = addAtom(aM1, aM2);
+	atomCharge = insertVector(aC1, aC2);
+}
+
+void GenerateAtom::generateTwoIdenticalAntiSymmetricAtoms(
+	std::vector<double> &xPositions,
+	std::vector<double> &vVelocities,
+	std::vector<double> &atomsMass,
+	std::vector<double> &atomCharge)
+{
+	vector<double> x1, x2, v1, v2, aM1, aM2, aC1, aC2;
+	generateInitialPositionAndVelocity(x1, v1, aM1, aC1);
+	x2 = x1;
+	v2 = v1;
+	aM2 = aM1;
+	aC2 = aC1;
+	for (size_t i = 0; i < x1.size(); i++)
+	{
+		v2[i] *= -1.0e0;
+	}
+	xPositions = addAtom(x1, x2);
+	vVelocities = addAtom(v1, v2);
+	atomsMass = addAtom(aM1, aM2);
+	atomCharge = insertVector(aC1, aC2);
+}
+
 
 double GenerateAtom::randomNumber(double fMin, double fMax)
 {
