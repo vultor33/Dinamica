@@ -22,17 +22,14 @@ public:
 		std::vector<double> &atomsMass_in,
 		std::vector<double> &atomsCharge_in);
 
-	void setOptions(bool printEnergy_in);
+	void setOptions(bool printEnergy_in, bool simmetrize_in);
 
 private:
 	int integratorType;
-
 	bool printEnergy;
-
+	bool simmetrize;
 	std::vector<double> rksParams;
-
 	std::vector<double> atomsCharge;
-
 	std::vector<double> atomsMass;
 	
 	std::ofstream printEnergyFile_;

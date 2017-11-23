@@ -15,6 +15,7 @@ public:
 	);
 
 private:
+	double timeStep;
 	int iterationLoop;
 	int printLoop;
 	double initialDistance;
@@ -23,6 +24,7 @@ private:
 	bool checkStopSimulationConditions;
 	bool stopSimulation;
 	bool printEnergy;
+	bool simmetrize;
 	std::string outputName;
 
 	void checkStopSimulation(std::vector<double> &x);

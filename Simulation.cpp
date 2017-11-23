@@ -10,15 +10,19 @@ using namespace std;
 
 Simulation::Simulation()
 {
+	timeStep = 0.01;
 	iterationLoop = 100;
-	printLoop = 2000;
+	printLoop = 5000;
 	initialDistance = 5.0e0;
-	impactParameter = 0.0e0;
+	impactParameter = 1.0e0;
 	initialSpeed = 0.0005;
 	checkStopSimulationConditions = false;
 	stopSimulation = false;
-	printEnergy = false;
+	printEnergy = true;
+	simmetrize = false;
 	outputName = "simulacao.xyz";
+
+	// CENTRO DE MASSA MEXENDO - TEM MAIS COISA AQUI.
 
 
 
@@ -43,7 +47,7 @@ void Simulation::startSimulation(int seed)
 
 	Integrator rk_;
 	rk_.setAdditionalParams(atomsMass, atomsCharge);
-	rk_.setOptions(printEnergy);
+	rk_.setOptions(printEnergy, simmetrize);
 
 	remove(outputName.c_str());
 	printCoulombAtoms(x, outputName, atomsCharge);
@@ -52,7 +56,7 @@ void Simulation::startSimulation(int seed)
 	{
 		for (int j = 0; j < iterationLoop; j++)
 		{
-			rk_.rungeKuttaSimetrico(x, v, 0.01);
+			rk_.rungeKuttaSimetrico(x, v, timeStep);
 		}
 		cout << 100 * i / printLoop << " %" << endl; ;
 		printCoulombAtoms(x, outputName, atomsCharge);

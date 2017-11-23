@@ -13,6 +13,7 @@ using namespace std;
 Integrator::Integrator()
 {
 	printEnergy = false;
+	simmetrize = false;
 	integratorType = 0;
 	rksParams.resize(19);
 	rksParams[0] = 0.095176255;
@@ -47,13 +48,14 @@ void Integrator::setAdditionalParams(
 	atomsCharge = atomsCharge_in;
 }
 
-void Integrator::setOptions(bool printEnergy_in)
+void Integrator::setOptions(bool printEnergy_in, bool simmetrize_in)
 {
 	printEnergy = printEnergy_in;
 	if (printEnergy)
 	{
 		printEnergyFile_.open("printEnergyFile.csv");
 	}
+	simmetrize = simmetrize_in;
 }
 
 void Integrator::rungeKuttaSimetrico(
@@ -84,6 +86,7 @@ void Integrator::rungeKuttaSimetrico(
 	for (size_t i = 0; i < size; i++)
 		xInitial[i] += timeStep * rksParams[0] * vInitial[i];
 
+
 	for (size_t k = 1; k < rksParams.size(); k += 2)
 	{
 		//fit_.lennardJonesGradient(xInitial, force);
@@ -94,6 +97,23 @@ void Integrator::rungeKuttaSimetrico(
 			xInitial[i] += timeStep * rksParams[k+1] * vInitial[i];
 		}
 	}
+
+	if (simmetrize)
+	{
+		xInitial[2] = -xInitial[0];
+		xInitial[3] = -xInitial[1];
+		xInitial[6] = -xInitial[4];
+		xInitial[7] = -xInitial[5];
+		xInitial[10] = -xInitial[8];
+		xInitial[11] = -xInitial[9];
+		vInitial[2] = -vInitial[0];
+		vInitial[3] = -vInitial[1];
+		vInitial[6] = -vInitial[4];
+		vInitial[7] = -vInitial[5];
+		vInitial[10] = -vInitial[8];
+		vInitial[11] = -vInitial[9];
+	}
+
 }
 
 
