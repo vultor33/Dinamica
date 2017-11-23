@@ -1,0 +1,5 @@
+*.xyz
+*.csv
+*vcxproj*
+Debug*
+Release*
