@@ -51,7 +51,6 @@ private:
 
 	void initialVelocityKinecticTheory(double TempKelvin);
 
-
 };
 
 #endif

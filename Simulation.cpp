@@ -5,6 +5,8 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <vector>
+#include <iostream>
 
 #include "GenerateAtom.h"
 #include "Integrator.h"
@@ -116,7 +118,6 @@ void Simulation::startSimulation(
 			checkStopSimulation(x);
 		if (stopSimulation)
 			break;
-
 		if (printPosVel)
 			printPositionsAndVelocities(x, v, posVel_);
 
@@ -136,7 +137,6 @@ void Simulation::initialVelocityKinecticTheory(double TempKelvin)
 	double TempAUnits = TempKelvin / temperatureUnit;
 	initialSpeed = sqrt(3.0e0 * TempAUnits / (1.0e0 + mProton)) / 2.0e0;
 }
-
 void Simulation::checkStopSimulation(vector<double> & x)
 {
 	for (size_t i = 0; i < x.size(); i++)
@@ -177,4 +177,3 @@ void Simulation::printPositionsAndVelocities(
 	}
 	posVelFile_ << endl;
 }
-

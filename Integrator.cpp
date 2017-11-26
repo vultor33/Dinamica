@@ -75,6 +75,7 @@ void Integrator::rungeKuttaSimetrico(
 			atomsMass,
 			printEnergyFile_);
 		fit_.printCenterOfMass(xInitial, atomsMass, printEnergyFile_);
+
 		printEnergyFile_ << endl;
 	}
 

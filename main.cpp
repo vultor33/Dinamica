@@ -18,9 +18,10 @@ int main(int argc, char *argv[])
 {
 	if (argc < 2)
 	{
-		cout << "Error - Simlation type not found" << endl;
-		exit(1);
+//		cout << "Error - Simlation type not found" << endl;
+//		exit(1);
 	}
+/*
 	string simlationType = argv[1];
 	int seedI, seedF;
 	if (simlationType == "run")
@@ -29,7 +30,9 @@ int main(int argc, char *argv[])
 		convert << argv[2] << " " << argv[3];
 		convert >> seedI >> seedF;
 	}
-
+	*/
+	int seedI = 1;
+	int seedF = 1;
 	runSimulations(seedI, seedF, 0.0e0, 100.0e0);
 	runSimulations(seedI, seedF, 0.0e0, 300.0e0);
 	runSimulations(seedI, seedF, 0.0e0, 1000.0e0);
@@ -68,7 +71,6 @@ void runSimulations(int seedInitial, int seedFinal, double impacFactorAu, double
 		dim5.startSimulation(i, tempKelvin, impacFactorAu, 4);
 	}
 }
-
 
 
 /*
