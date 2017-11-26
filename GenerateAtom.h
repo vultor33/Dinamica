@@ -42,6 +42,9 @@ public:
 
 	void translateToCenterOfMass(std::vector<double> &x, std::vector<double> &atomsMass);
 
+	// NOT WORKING
+	void velocityCmCorrection(std::vector<double> &v, std::vector<double> &atomsMass);//4 particles SPECIFIC
+
 private:
 	double mProton;
 	double pi_;

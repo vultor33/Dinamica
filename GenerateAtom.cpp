@@ -193,6 +193,39 @@ void GenerateAtom::translateToCenterOfMass(
 	}
 }
 
+void GenerateAtom::velocityCmCorrection(std::vector<double> &v, std::vector<double> &atomsMass)
+{
+	double vmx = 0.0e0;
+	double vmy = 0.0e0;
+	double vmz = 0.0e0;
+	int natm = v.size() / 3;
+	double mProton = atomsMass[1];
+	for (int i = 0; i < natm; i++)
+	{
+		vmx += v[i] * atomsMass[i];
+		vmy += v[i + natm] * atomsMass[i + natm];
+		vmz += v[i + 2 * natm] * atomsMass[i + 2 * natm];
+	}
+	// imprecisao numerica
+	double vPCorrX = vmx / (2.0e0 * mProton);
+	double vPCorrY = vmy / (2.0e0 * mProton);
+	double vPCorrZ = vmz / (2.0e0 * mProton);
+	v[1] -= vPCorrX;
+	v[3] -= vPCorrX;
+	v[5] -= vPCorrY;
+	v[7] -= vPCorrY;
+	v[9] -= vPCorrZ;
+	v[11] -= vPCorrZ;
+	vmx = vmy = vmz = 0.0e0;
+	for (int i = 0; i < natm; i++)
+	{
+		vmx += v[i] * atomsMass[i];
+		vmy += v[i + natm] * atomsMass[i + natm];
+		vmz += v[i + 2 * natm] * atomsMass[i + 2 * natm];
+	}
+	vmx = 1;
+}
+
 void GenerateAtom::generateInitialPositionAndVelocity(
 	vector<double> &xPositions,
 	vector<double> &vVelocities,

@@ -5,19 +5,71 @@
 #include <cstdlib>
 #include <cmath>
 #include <time.h>
+#include <string>
+#include <sstream>
 
 #include "Simulation.h"
 
 using namespace std;
 
-int main()
+void runSimulations(int seedInitial, int seedFinal, double impacFactorAu, double tempKelvin);
+
+int main(int argc, char *argv[])
 {
+	if (argc < 2)
+	{
+		cout << "Error - Simlation type not found" << endl;
+		exit(1);
+	}
+	string simlationType = argv[1];
+	int seedI, seedF;
+	if (simlationType == "run")
+	{
+		stringstream convert;
+		convert << argv[2] << " " << argv[3];
+		convert >> seedI >> seedF;
+	}
+
+	runSimulations(seedI, seedF, 0.0e0, 100.0e0);
+	runSimulations(seedI, seedF, 0.0e0, 300.0e0);
+	runSimulations(seedI, seedF, 0.0e0, 1000.0e0);
+	runSimulations(seedI, seedF, 0.5e0, 100.0e0);
+	runSimulations(seedI, seedF, 0.5e0, 300.0e0);
+	runSimulations(seedI, seedF, 0.5e0, 1000.0e0);
+	runSimulations(seedI, seedF, 1.0e0, 100.0e0);
+	runSimulations(seedI, seedF, 1.0e0, 300.0e0);
+	runSimulations(seedI, seedF, 1.0e0, 1000.0e0);
+	runSimulations(seedI, seedF, 1.5e0, 100.0e0);
+	runSimulations(seedI, seedF, 1.5e0, 300.0e0);
+	runSimulations(seedI, seedF, 1.5e0, 1000.0e0);
+
+	/*
+	int seed, simulationType;
+	double tempKelvin, impactFactorAu;
+	seed = time(NULL);
+	tempKelvin = 300e0;
+	impactFactorAu = 1.0e0;
+	simulationType = 0;
 	Simulation tacaMagia;
-	tacaMagia.startSimulation(time(NULL));
+	tacaMagia.startSimulation(seed, tempKelvin, impactFactorAu, simulationType);
+	*/
 	return 0;
-
-
 }
+
+void runSimulations(int seedInitial, int seedFinal, double impacFactorAu, double tempKelvin)
+{
+	for (int i = seedInitial; i <= seedFinal; i++)
+	{
+		Simulation dim1, dim2, dim3, dim4, dim5;
+		dim1.startSimulation(i, tempKelvin, impacFactorAu, 0);
+		dim2.startSimulation(i, tempKelvin, impacFactorAu, 1);
+		dim3.startSimulation(i, tempKelvin, impacFactorAu, 2);
+		dim4.startSimulation(i, tempKelvin, impacFactorAu, 3);
+		dim5.startSimulation(i, tempKelvin, impacFactorAu, 4);
+	}
+}
+
+
 
 /*
 DIDNT WORKED

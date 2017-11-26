@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <fstream>
 
 class Simulation
 {
@@ -11,7 +12,10 @@ public:
 	~Simulation();
 
 	void startSimulation(
-		int seed
+		int seed,
+		double tempKelvin,
+		double impactFactorAu,
+		int simulationType
 	);
 
 private:
@@ -25,7 +29,13 @@ private:
 	bool stopSimulation;
 	bool printEnergy;
 	bool simmetrize;
+	bool printMovie;
+	bool printPosVel;
+	double maxStopSimulationDistance;
+	double temperatureUnit;
+	double mProton;
 	std::string outputName;
+	std::ofstream posVel_;
 
 	void checkStopSimulation(std::vector<double> &x);
 
@@ -33,6 +43,13 @@ private:
 		std::vector<double> & atoms,
 		std::string testName,
 		std::vector<double> &atomsCharge);
+
+	void printPositionsAndVelocities(
+		std::vector<double> &x,
+		std::vector<double> &v,
+		std::ofstream &posVelFile_);
+
+	void initialVelocityKinecticTheory(double TempKelvin);
 
 
 };
