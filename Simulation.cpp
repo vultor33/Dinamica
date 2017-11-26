@@ -7,6 +7,7 @@
 #include <sstream>
 #include <vector>
 #include <iostream>
+#include <cmath>
 
 #include "GenerateAtom.h"
 #include "Integrator.h"
