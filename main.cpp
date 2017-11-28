@@ -60,17 +60,17 @@ int main(int argc, char *argv[])
 			convert << argv[2] << " " << argv[3];
 			convert >> seedI >> seedF;
 			runSimulationsSymmetric(seedI, seedF, 0.0e0, 100.0e0);
-			runSimulations(seedI, seedF, 0.0e0, 300.0e0);
-			runSimulations(seedI, seedF, 0.0e0, 1000.0e0);
-			runSimulations(seedI, seedF, 0.5e0, 100.0e0);
-			runSimulations(seedI, seedF, 0.5e0, 300.0e0);
-			runSimulations(seedI, seedF, 0.5e0, 1000.0e0);
-			runSimulations(seedI, seedF, 1.0e0, 100.0e0);
-			runSimulations(seedI, seedF, 1.0e0, 300.0e0);
-			runSimulations(seedI, seedF, 1.0e0, 1000.0e0);
-			runSimulations(seedI, seedF, 1.5e0, 100.0e0);
-			runSimulations(seedI, seedF, 1.5e0, 300.0e0);
-			runSimulations(seedI, seedF, 1.5e0, 1000.0e0);
+			runSimulationsSymmetric(seedI, seedF, 0.0e0, 300.0e0);
+			runSimulationsSymmetric(seedI, seedF, 0.0e0, 1000.0e0);
+			runSimulationsSymmetric(seedI, seedF, 0.5e0, 100.0e0);
+			runSimulationsSymmetric(seedI, seedF, 0.5e0, 300.0e0);
+			runSimulationsSymmetric(seedI, seedF, 0.5e0, 1000.0e0);
+			runSimulationsSymmetric(seedI, seedF, 1.0e0, 100.0e0);
+			runSimulationsSymmetric(seedI, seedF, 1.0e0, 300.0e0);
+			runSimulationsSymmetric(seedI, seedF, 1.0e0, 1000.0e0);
+			runSimulationsSymmetric(seedI, seedF, 1.5e0, 100.0e0);
+			runSimulationsSymmetric(seedI, seedF, 1.5e0, 300.0e0);
+			runSimulationsSymmetric(seedI, seedF, 1.5e0, 1000.0e0);
 		}
 	}
 	return 0;
