@@ -24,7 +24,7 @@ public:
 
 	bool lennardJonesGradient(std::vector<double> &x, std::vector<double> &gradient);
 
-	double Fitness::CoulombEnergy(std::vector<double> &x, std::vector<double> & atomsCharge);
+	double CoulombEnergy(std::vector<double> &x, std::vector<double> & atomsCharge);
 
 	bool CoulombGradient(
 		std::vector<double> & x,

@@ -61,18 +61,17 @@ int main(int argc, char *argv[])
 			convert >> seedI >> seedF;
 			runSimulationsSymmetric(seedI, seedF, 0.0e0, 100.0e0);
 			runSimulations(seedI, seedF, 0.0e0, 300.0e0);
-			runSimulations(seedI, seedF, 0.0e0, 600.0e0);
+			runSimulations(seedI, seedF, 0.0e0, 1000.0e0);
 			runSimulations(seedI, seedF, 0.5e0, 100.0e0);
 			runSimulations(seedI, seedF, 0.5e0, 300.0e0);
-			runSimulations(seedI, seedF, 0.5e0, 600.0e0);
+			runSimulations(seedI, seedF, 0.5e0, 1000.0e0);
 			runSimulations(seedI, seedF, 1.0e0, 100.0e0);
 			runSimulations(seedI, seedF, 1.0e0, 300.0e0);
-			runSimulations(seedI, seedF, 1.0e0, 600.0e0);
+			runSimulations(seedI, seedF, 1.0e0, 1000.0e0);
 			runSimulations(seedI, seedF, 1.5e0, 100.0e0);
 			runSimulations(seedI, seedF, 1.5e0, 300.0e0);
-			runSimulations(seedI, seedF, 1.5e0, 600.0e0);
+			runSimulations(seedI, seedF, 1.5e0, 1000.0e0);
 		}
-
 	}
 	return 0;
 }

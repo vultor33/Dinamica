@@ -7,6 +7,7 @@
 #include <sstream>
 #include <vector>
 #include <iostream>
+#include <cmath>
 
 #include "GenerateAtom.h"
 #include "Integrator.h"
@@ -17,7 +18,7 @@ Simulation::Simulation()
 {
 	timeStep = 0.001e0;
 	iterationLoop = 1000;
-	printLoop = 3000;
+	printLoop = 4000;
 	initialDistance = 5.0e0;
 	impactParameter = 1.0e0;
 	initialSpeed = 0.001;

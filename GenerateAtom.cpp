@@ -245,8 +245,6 @@ void GenerateAtom::generateInitialPositionAndVelocity(
 	eVel[1] /= norm;
 	eVel[2] /= norm;
 
-	double perpend = eVel[0] * ePos[0] + eVel[1] * ePos[1] + eVel[2] * ePos[2];
-
 	vector<double> protonVel = eVel;
 	protonVel[0] /= -mProton;
 	protonVel[1] /= -mProton;
