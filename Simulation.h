@@ -18,6 +18,8 @@ public:
 		int simulationType
 	);
 
+	void additionalOptions(std::string flag, bool option);
+
 private:
 	double timeStep;
 	int iterationLoop;

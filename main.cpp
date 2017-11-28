@@ -14,48 +14,66 @@ using namespace std;
 
 void runSimulations(int seedInitial, int seedFinal, double impacFactorAu, double tempKelvin);
 
+void runSimulationsSymmetric(int seedInitial, int seedFinal, double impacFactorAu, double tempKelvin);
+
 int main(int argc, char *argv[])
 {
 	if (argc < 2)
 	{
-//		cout << "Error - Simlation type not found" << endl;
-//		exit(1);
+		int seed, simulationType;
+		double tempKelvin, impactFactorAu;
+		seed = time(NULL);
+		tempKelvin = 300e0;
+		impactFactorAu = 0.5e0;
+		simulationType = 5;
+		Simulation tacaMagia;
+		tacaMagia.additionalOptions("printMovie", true);
+		tacaMagia.additionalOptions("printEnergy", false);
+		tacaMagia.additionalOptions("printPosVel", false);
+		tacaMagia.startSimulation(seed, tempKelvin, impactFactorAu, simulationType);
 	}
-/*
-	string simlationType = argv[1];
-	int seedI, seedF;
-	if (simlationType == "run")
+	else
 	{
-		stringstream convert;
-		convert << argv[2] << " " << argv[3];
-		convert >> seedI >> seedF;
-	}
-	*/
-	int seedI = 1;
-	int seedF = 1;
-	runSimulations(seedI, seedF, 0.0e0, 100.0e0);
-	runSimulations(seedI, seedF, 0.0e0, 300.0e0);
-	runSimulations(seedI, seedF, 0.0e0, 1000.0e0);
-	runSimulations(seedI, seedF, 0.5e0, 100.0e0);
-	runSimulations(seedI, seedF, 0.5e0, 300.0e0);
-	runSimulations(seedI, seedF, 0.5e0, 1000.0e0);
-	runSimulations(seedI, seedF, 1.0e0, 100.0e0);
-	runSimulations(seedI, seedF, 1.0e0, 300.0e0);
-	runSimulations(seedI, seedF, 1.0e0, 1000.0e0);
-	runSimulations(seedI, seedF, 1.5e0, 100.0e0);
-	runSimulations(seedI, seedF, 1.5e0, 300.0e0);
-	runSimulations(seedI, seedF, 1.5e0, 1000.0e0);
+		string simlationType = argv[1];
+		int seedI, seedF;
+		if (simlationType == "run")
+		{
+			stringstream convert;
+			convert << argv[2] << " " << argv[3];
+			convert >> seedI >> seedF;
+			runSimulations(seedI, seedF, 0.0e0, 100.0e0);
+			runSimulations(seedI, seedF, 0.0e0, 300.0e0);
+			runSimulations(seedI, seedF, 0.0e0, 1000.0e0);
+			runSimulations(seedI, seedF, 0.5e0, 100.0e0);
+			runSimulations(seedI, seedF, 0.5e0, 300.0e0);
+			runSimulations(seedI, seedF, 0.5e0, 1000.0e0);
+			runSimulations(seedI, seedF, 1.0e0, 100.0e0);
+			runSimulations(seedI, seedF, 1.0e0, 300.0e0);
+			runSimulations(seedI, seedF, 1.0e0, 1000.0e0);
+			runSimulations(seedI, seedF, 1.5e0, 100.0e0);
+			runSimulations(seedI, seedF, 1.5e0, 300.0e0);
+			runSimulations(seedI, seedF, 1.5e0, 1000.0e0);
+		}
+		if (simlationType == "symmetric")
+		{
+			stringstream convert;
+			convert << argv[2] << " " << argv[3];
+			convert >> seedI >> seedF;
+			runSimulationsSymmetric(seedI, seedF, 0.0e0, 100.0e0);
+			runSimulations(seedI, seedF, 0.0e0, 300.0e0);
+			runSimulations(seedI, seedF, 0.0e0, 600.0e0);
+			runSimulations(seedI, seedF, 0.5e0, 100.0e0);
+			runSimulations(seedI, seedF, 0.5e0, 300.0e0);
+			runSimulations(seedI, seedF, 0.5e0, 600.0e0);
+			runSimulations(seedI, seedF, 1.0e0, 100.0e0);
+			runSimulations(seedI, seedF, 1.0e0, 300.0e0);
+			runSimulations(seedI, seedF, 1.0e0, 600.0e0);
+			runSimulations(seedI, seedF, 1.5e0, 100.0e0);
+			runSimulations(seedI, seedF, 1.5e0, 300.0e0);
+			runSimulations(seedI, seedF, 1.5e0, 600.0e0);
+		}
 
-	/*
-	int seed, simulationType;
-	double tempKelvin, impactFactorAu;
-	seed = time(NULL);
-	tempKelvin = 300e0;
-	impactFactorAu = 1.0e0;
-	simulationType = 0;
-	Simulation tacaMagia;
-	tacaMagia.startSimulation(seed, tempKelvin, impactFactorAu, simulationType);
-	*/
+	}
 	return 0;
 }
 
@@ -69,6 +87,15 @@ void runSimulations(int seedInitial, int seedFinal, double impacFactorAu, double
 		dim3.startSimulation(i, tempKelvin, impacFactorAu, 2);
 		dim4.startSimulation(i, tempKelvin, impacFactorAu, 3);
 		dim5.startSimulation(i, tempKelvin, impacFactorAu, 4);
+	}
+}
+
+void runSimulationsSymmetric(int seedInitial, int seedFinal, double impacFactorAu, double tempKelvin)
+{
+	for (int i = seedInitial; i <= seedFinal; i++)
+	{
+		Simulation dim1;
+		dim1.startSimulation(i, tempKelvin, impacFactorAu, 5);
 	}
 }
 

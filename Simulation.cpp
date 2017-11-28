@@ -17,7 +17,7 @@ Simulation::Simulation()
 {
 	timeStep = 0.001e0;
 	iterationLoop = 1000;
-	printLoop = 4000;
+	printLoop = 3000;
 	initialDistance = 5.0e0;
 	impactParameter = 1.0e0;
 	initialSpeed = 0.001;
@@ -68,6 +68,12 @@ void Simulation::startSimulation(
 	case 4:
 		genAtom_.generateTwoIdenticalSymmetricAtoms(x, v, atomsMass, atomsCharge);
 		break;
+
+	case 5:
+		genAtom_.generateTwoAntiSymmetricAtoms(x, v, atomsMass, atomsCharge);
+		simmetrize = true;
+		break;
+		
 
 	default:
 		cout << "simulation type not found" << endl;
@@ -128,6 +134,21 @@ void Simulation::startSimulation(
 		}
 	}
 
+}
+
+void Simulation::additionalOptions(string flag, bool option)
+{
+	if (flag == "printMovie")
+		printMovie = option;
+	else if (flag == "printEnergy")
+		printEnergy = option;
+	else if (flag == "printPosVel")
+		printPosVel = option;
+	else
+	{
+		cout << "flag not found" << endl;
+		exit(1);
+	}
 }
 
 void Simulation::initialVelocityKinecticTheory(double TempKelvin)
