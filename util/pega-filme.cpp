@@ -79,7 +79,7 @@ int main()
 			{
 				for(size_t i = 0; i < allX.size(); i++)
 				{
-					printCoulombAtoms(allX[i],seedString + "-" + tempString + "-" + impactString + "-" + methodString + ".xyz",atomsCharge);
+					printCoulombAtoms(allX[i],methodString + "-" + seedString + "-" + tempString + "-" + impactString + ".xyz",atomsCharge);
 				}	
 
 				movieSimul_ << seedString << " ; "
