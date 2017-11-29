@@ -12,7 +12,7 @@ int main()
 	int nProc = 8;
 	ofstream roda_("roda.x");
 	roda_ << "#!/bin/bash" << endl << endl;
-	for(int i = 0; i < nSeeds * nProc; i += nSeeds)
+	for(int i = 480; i < 480 + nSeeds * nProc; i += nSeeds)
 	{
 		roda_ << "./drkai.x symmetric " << i + 1 << "  " << i + nSeeds << " & " << endl;			
 	}
