@@ -9,12 +9,15 @@
 #include <sstream>
 
 #include "Simulation.h"
+#include "Analyze.h"
 
 using namespace std;
 
 void runSimulations(int seedInitial, int seedFinal, double impacFactorAu, double tempKelvin);
 
 void runSimulationsSymmetric(int seedInitial, int seedFinal, double impacFactorAu, double tempKelvin);
+
+void generateSeeds(); // GENERATE A LOT OF INITIAL CONDITIONS
 
 int main(int argc, char *argv[])
 {
@@ -54,7 +57,7 @@ int main(int argc, char *argv[])
 			runSimulations(seedI, seedF, 1.5e0, 300.0e0);
 			runSimulations(seedI, seedF, 1.5e0, 1000.0e0);
 		}
-		if (simlationType == "symmetric")
+		else if (simlationType == "symmetric")
 		{
 			stringstream convert;
 			convert << argv[2] << " " << argv[3];
@@ -71,6 +74,11 @@ int main(int argc, char *argv[])
 			runSimulationsSymmetric(seedI, seedF, 1.5e0, 100.0e0);
 			runSimulationsSymmetric(seedI, seedF, 1.5e0, 300.0e0);
 			runSimulationsSymmetric(seedI, seedF, 1.5e0, 1000.0e0);
+		}
+		else if (simlationType == "charge")
+		{
+			Analyze an_;
+			an_.takeChargeDistribution();
 		}
 	}
 	return 0;
@@ -97,6 +105,21 @@ void runSimulationsSymmetric(int seedInitial, int seedFinal, double impacFactorA
 		dim1.startSimulation(i, tempKelvin, impacFactorAu, 5);
 	}
 }
+
+void generateSeeds()
+{
+	int nSeeds = 60;
+	int nProc = 8;
+	ofstream roda_("roda.x");
+	roda_ << "#!/bin/bash" << endl << endl;
+	for (int i = 480; i < 480 + nSeeds * nProc; i += nSeeds)
+	{
+		roda_ << "./drkai.x symmetric " << i + 1 << "  " << i + nSeeds << " & " << endl;
+	}
+	roda_.close();
+	system("chmod u+x roda.x");
+}
+
 
 
 /*

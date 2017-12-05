@@ -21,7 +21,7 @@ LFLAGS = -O3 -lpthread
 LIBS = 
 
 # define the C++ source files
-SRCS = Fitness.cpp GenerateAtom.cpp Integrator.cpp main.cpp ReadQuantumOutput.cpp Simulation.cpp WriteQuantumInput.cpp
+SRCS = Analyze.cpp Fitness.cpp GenerateAtom.cpp Integrator.cpp main.cpp ReadQuantumOutput.cpp Simulation.cpp WriteQuantumInput.cpp
 
 #dlib path
 #../dlib-19.4/dlib/all/source.cpp
