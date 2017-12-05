@@ -6,6 +6,7 @@
 #include <sstream>
 #include <iostream>
 #include <stdlib.h>
+#include <cmath>
 
 #include "Coordstructs.h"
 #include "AuxMath.h"
@@ -84,7 +85,8 @@ void Analyze::chargeDistribution(string fileName)
 	}
 
 	for (size_t i = 0; i < countHisto.size(); i++)
-		cout << i << "  count:  " << countHisto[i] << endl;
+		results_ << countHisto[i] << " ; ";
+	results_ << endl;
 }
 
 vector< vector<CoordXYZ> > Analyze::readSimulationInput(string fileName)
