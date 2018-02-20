@@ -25,15 +25,25 @@ int main(int argc, char *argv[])
 	{
 		int seed, simulationType;
 		double tempKelvin, impactFactorAu;
+		/*
 		seed = time(NULL);
-		tempKelvin = 300e0;
+		tempKelvin = 3000e0;
 		impactFactorAu = 0.5e0;
 		simulationType = 5;
+		*/
+		seed = time(NULL);
+		tempKelvin = 0.0e0;
+		impactFactorAu = 0.0e0;
+		simulationType = 6;
+
 		Simulation tacaMagia;
 		tacaMagia.additionalOptions("printMovie", true);
 		tacaMagia.additionalOptions("printEnergy", false);
-		tacaMagia.additionalOptions("printPosVel", false);
+		tacaMagia.additionalOptions("printPosVel", true);
 		tacaMagia.startSimulation(seed, tempKelvin, impactFactorAu, simulationType);
+
+		Analyze an_;
+		an_.chargeDistribution("simulacao.xyz");
 	}
 	else
 	{

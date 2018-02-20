@@ -16,6 +16,8 @@ public:
 
 	void takeReactedResults();
 
+	void chargeDistribution(std::string fileName);
+
 private:
 	std::vector< std::vector<CoordXYZ> > readSimulationInput(std::string fileName);
 
@@ -24,8 +26,6 @@ private:
 	std::string takeStringUntilCharacter(std::string &entryString, std::string referenceCharacter);
 
 	void printCoulombAtoms(std::vector<double> & atoms, std::string testName, std::vector<double> &atomsCharge);
-
-	void chargeDistribution(std::string fileName);
 
 	//data
 	double bondDistanceCut;

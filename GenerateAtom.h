@@ -40,6 +40,13 @@ public:
 		std::vector<double> &atomsMass,
 		std::vector<double> &atomCharge);
 
+	void generateBohrMolecule(
+		std::vector<double> &xPositions,
+		std::vector<double> &vVelocities,
+		std::vector<double> &atomsMass,
+		std::vector<double> &atomCharge);
+
+
 	void translateToCenterOfMass(std::vector<double> &x, std::vector<double> &atomsMass);
 
 	// NOT WORKING

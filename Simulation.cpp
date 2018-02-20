@@ -16,10 +16,12 @@ using namespace std;
 
 Simulation::Simulation()
 {
-	timeStep = 0.001e0;
+	timeStep = 0.01e0;
+	// 5000000 it * print
 	iterationLoop = 1000;
-	printLoop = 4000;
-	initialDistance = 5.0e0;
+	printLoop = 300;
+	//initialDistance = 5.0e0;
+	initialDistance = 0.0e0;
 	impactParameter = 1.0e0;
 	initialSpeed = 0.001;
 	checkStopSimulationConditions = true;
@@ -74,6 +76,11 @@ void Simulation::startSimulation(
 		genAtom_.generateTwoAntiSymmetricAtoms(x, v, atomsMass, atomsCharge);
 		simmetrize = true;
 		break;
+
+	case 6:
+		genAtom_.generateBohrMolecule(x, v, atomsMass, atomsCharge);
+		simmetrize = true;
+		break;
 		
 
 	default:
@@ -115,6 +122,8 @@ void Simulation::startSimulation(
 			<< " zE1 ; vzE1 ; zP1 ; vzP1 ; zE2 ; vzE2; zP2 ; vzP2 "
 			<< endl;
 	}
+	if (printPosVel)
+		printPositionsAndVelocities(x, v, posVel_);
 	for (int i = 0; i < printLoop; i++)
 	{
 		for (int j = 0; j < iterationLoop; j++)

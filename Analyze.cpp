@@ -45,48 +45,145 @@ void Analyze::chargeDistribution(string fileName)
 {
 	vector< vector<CoordXYZ> > allMol = readSimulationInput(fileName);
 	ofstream results_;
-	results_.open("electronPlot.csv", std::ofstream::out | std::ofstream::app);
+	//results_.open("electronPlot.csv", std::ofstream::out | std::ofstream::app);
+	results_.open("electronPlot.csv");
+	ofstream rppGraph_("rppGraph.csv");
+	ofstream yTraject_("yTrajectory.csv");
 	vector<int> countHisto(12);
 	for (size_t i = 0; i < countHisto.size(); i++)
 		countHisto[i] = 0;
+	double rppMean = 0.0e0;
+	double rpp0 = 0.0e0;
+	vector<double> initialEP1;
+	int kRpp = 1;
+	double oldAmpl = -1.0e0;
+	int iOldAmpl = -1;
+	double midAmpl = -1.0e0;
+	int iMidAmpl = -1;
+	vector<int> amplMax;
 	for (size_t i = 0; i < allMol.size(); i++)
 	{
 		double rpp = sqrt(
 			(allMol[i][1].x - allMol[i][3].x)*(allMol[i][1].x - allMol[i][3].x)
 			+ (allMol[i][1].y - allMol[i][3].y)*(allMol[i][1].y - allMol[i][3].y)
 			+ (allMol[i][1].z - allMol[i][3].z)*(allMol[i][1].z - allMol[i][3].z));
+		rppMean += rpp;
 
-		if (rpp < bondDistanceCut)
+		/* plot rpp all
+		if (i % 100 == 0)
 		{
-			vector<double> vecPP(3);
-			vecPP[0] = -allMol[i][3].x + allMol[i][1].x;
-			vecPP[1] = -allMol[i][3].y + allMol[i][1].y;
-			vecPP[2] = -allMol[i][3].z + allMol[i][1].z;
-			vector<double> vecEP1(3);
-			vecEP1[0] = -allMol[i][0].x + allMol[i][1].x;
-			vecEP1[1] = -allMol[i][0].y + allMol[i][1].y;
-			vecEP1[2] = -allMol[i][0].z + allMol[i][1].z;
-			vector<double> vecEP2(3);
-			vecEP2[0] = -allMol[i][2].x + allMol[i][1].x;
-			vecEP2[1] = -allMol[i][2].y + allMol[i][1].y;
-			vecEP2[2] = -allMol[i][2].z + allMol[i][1].z;
-
-			AuxMath auxMath_;
-			double prodEsc = auxMath_.escalarProduct(
-				vecPP[0], vecPP[1], vecPP[2],
-				vecEP1[0], vecEP1[1], vecEP1[2]);
-			double prodEsc2 = auxMath_.escalarProduct(
-				vecPP[0], vecPP[1], vecPP[2],
-				vecEP2[0], vecEP2[1], vecEP2[2]);
-
-			addToCount(countHisto, prodEsc / rpp, rpp);
-			addToCount(countHisto, prodEsc2 / rpp, rpp);
+			rppGraph_ << kRpp << " ; " << rpp << endl;
+			kRpp++;
 		}
+		*/
+
+//		if (rpp < bondDistanceCut) //apagar
+
+		vector<double> vecPP(3);
+		vecPP[0] = -allMol[i][3].x + allMol[i][1].x;
+		vecPP[1] = -allMol[i][3].y + allMol[i][1].y;
+		vecPP[2] = -allMol[i][3].z + allMol[i][1].z;
+		vector<double> vecEP1(3);
+		vecEP1[0] = -allMol[i][0].x + allMol[i][1].x;
+		vecEP1[1] = -allMol[i][0].y + allMol[i][1].y;
+		vecEP1[2] = -allMol[i][0].z + allMol[i][1].z;
+		vector<double> vecEP2(3);
+		vecEP2[0] = -allMol[i][2].x + allMol[i][1].x;
+		vecEP2[1] = -allMol[i][2].y + allMol[i][1].y;
+		vecEP2[2] = -allMol[i][2].z + allMol[i][1].z;
+
+
+		if (i == 0)
+		{
+			rpp0 = rpp;
+		}
+
+
+		AuxMath auxMath_;
+		double prodEsc = auxMath_.escalarProduct(
+			vecPP[0], vecPP[1], vecPP[2],
+			vecEP1[0], vecEP1[1], vecEP1[2]);
+		double prodEsc2 = auxMath_.escalarProduct(
+			vecPP[0], vecPP[1], vecPP[2],
+			vecEP2[0], vecEP2[1], vecEP2[2]);
+
+		addToCount(countHisto, prodEsc / rpp, rpp);
+		addToCount(countHisto, prodEsc2 / rpp, rpp);
+
+		// y projection
+		// proj vector
+
+
+		double projJOnEpp = vecPP[1] / rpp;
+		vector<double> vProjJOnEpp(3);
+		vProjJOnEpp[0] = projJOnEpp * vecPP[0] / rpp;
+		vProjJOnEpp[1] = projJOnEpp * vecPP[1] / rpp;
+		vProjJOnEpp[2] = projJOnEpp * vecPP[2] / rpp;
+		vector<double> ppPerpendicular(3);
+		ppPerpendicular[0] = -vProjJOnEpp[0];
+		ppPerpendicular[1] = 1.0e0 - vProjJOnEpp[1];
+		ppPerpendicular[2] = -vProjJOnEpp[2];
+		double normPerp = auxMath_.norm(ppPerpendicular[0], ppPerpendicular[1], ppPerpendicular[2]);
+
+		double yProj = auxMath_.escalarProduct(
+			ppPerpendicular[0], ppPerpendicular[1], ppPerpendicular[2],
+			vecEP1[0], vecEP1[1], vecEP1[2]) / normPerp;
+
+		yTraject_ << ((prodEsc / rpp) - rpp0 / 2.0e0) << "  " << yProj << endl;
+		rppGraph_ << kRpp << "  " << rpp << endl;
+		kRpp++;
+
+		if ((midAmpl > oldAmpl) && (midAmpl > rpp))
+		{
+			//maximo
+			amplMax.push_back(iMidAmpl);
+		}
+		oldAmpl = midAmpl;
+		iOldAmpl = iMidAmpl;
+		midAmpl = rpp;
+		iMidAmpl = kRpp;
 	}
 
-	for (size_t i = 0; i < countHisto.size(); i++)
-		results_ << countHisto[i] << " ; ";
+	results_ << "-0.5-  " << countHisto[0] << endl;
+	results_ << "-0.5a-0.3  " << countHisto[1] << endl;
+	results_ << "-0.3a-0.1  " << countHisto[2] << endl;
+	results_ << "-0.1a0.1  " << countHisto[3] << endl;
+	results_ << "0.1a0.3  " << countHisto[4] << endl;
+	results_ << "0.3a0.5  " << countHisto[5] << endl;
+	results_ << "0.5a0.7  " << countHisto[6] << endl;
+	results_ << "0.7a0.9  " << countHisto[7] << endl;
+	results_ << "0.9a1.1  " << countHisto[8] << endl;
+	results_ << "1.1a1.3  " << countHisto[9] << endl;
+	results_ << "1.3a1.5  " << countHisto[10] << endl;
+	results_ << "1.5+  " << countHisto[11] << endl;
 	results_ << endl;
+	rppGraph_.close();
+
+	cout << endl << endl;
+	double amplMeanValue = 0.0e0;
+	for (size_t i = 1; i < amplMax.size(); i++)
+	{
+		amplMeanValue += (amplMax[i] - amplMax[i - 1]);
+	}
+	amplMeanValue /= (double)(amplMax.size() - 1);
+
+	results_ << "r mean: " << rppMean / allMol.size() << endl;
+	results_ << "periodo oscilacao:  " << amplMeanValue << endl;
+
+
+
+
+	
+	
+	
+	
+	results_.close();
+	
+
+
+
+
+
 }
 
 vector< vector<CoordXYZ> > Analyze::readSimulationInput(string fileName)

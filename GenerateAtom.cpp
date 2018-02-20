@@ -3,6 +3,8 @@
 #include <vector>
 #include <cmath>
 
+#include "AuxMath.h"
+
 using namespace std;
 
 GenerateAtom::GenerateAtom(int seed)
@@ -148,6 +150,50 @@ void GenerateAtom::generateTwoIdenticalAntiSymmetricAtoms(
 }
 
 
+void GenerateAtom::generateBohrMolecule(
+	std::vector<double> &xPositions,
+	std::vector<double> &vVelocities,
+	std::vector<double> &atomsMass,
+	std::vector<double> &atomCharge)
+{
+	vector<double> x1, x2, v1, v2, aM1, aM2, aC1, aC2;
+	// x[0, 2 e 4] eletron
+	// x[1, 3 e 5] proton
+	generateInitialPositionAndVelocity(x1, v1, aM1, aC1);
+	for (size_t i = 0; i < x1.size(); i++)
+	{
+		x1[i] = 0.0e0;
+		v1[i] = 0.0e0;
+	}
+
+	x1[2] = 0.893217217;
+	x1[5] = 0.5156992; // Re = 1.1
+	double vElec = 1.083720002;
+	AuxMath auxMath_;
+	double angle = 20.0e0; // graus
+	double tanAngle = tan(angle * auxMath_._pi / (180.0e0));
+	double vx = sqrt(vElec*vElec / (1 + tanAngle*tanAngle));
+	double vz = vx * tanAngle;
+
+	v1[0] = vx;
+	v1[4] = vz;
+
+	x2 = x1;
+	v2 = v1;
+	aM2 = aM1;
+	aC2 = aC1;
+	for (size_t i = 0; i < x1.size(); i++)
+	{
+		x2[i] *= -1.0e0;
+		v2[i] *= -1.0e0;
+	}
+	xPositions = addAtom(x1, x2);
+	vVelocities = addAtom(v1, v2);
+	atomsMass = addAtom(aM1, aM2);
+	atomCharge = insertVector(aC1, aC2);
+}
+
+
 double GenerateAtom::randomNumber(double fMin, double fMax)
 {
 	double f = ((double)rand() / (double)(RAND_MAX));
@@ -226,6 +272,9 @@ void GenerateAtom::velocityCmCorrection(std::vector<double> &v, std::vector<doub
 	vmx = 1;
 }
 
+// generate 1 eletron and 1 proton. 
+// x[0, 2 e 4] eletron
+// x[1, 3 e 5] proton
 void GenerateAtom::generateInitialPositionAndVelocity(
 	vector<double> &xPositions,
 	vector<double> &vVelocities,
