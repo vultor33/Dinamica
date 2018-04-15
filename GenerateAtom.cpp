@@ -166,11 +166,27 @@ void GenerateAtom::generateBohrMolecule(
 		v1[i] = 0.0e0;
 	}
 
+	/* De = 4.7 */
 	x1[2] = 0.893217217;
-	x1[5] = 0.5156992; // Re = 1.1
+	x1[5] = 0.5156992;
 	double vElec = 1.083720002;
+	
+
+	/*
+	x1[2] = 0.83217217;
+	x1[5] = 0.7;
+	double vElec = 1.083720002;
+	*/
+
+
+	/* Bohr
+	x1[2] = 0.952627944;
+	x1[5] = 0.55;
+	double vElec = 1.049382877;
+	*/
+
 	AuxMath auxMath_;
-	double angle = 20.0e0; // graus
+	double angle = 5.0e0; // graus
 	double tanAngle = tan(angle * auxMath_._pi / (180.0e0));
 	double vx = sqrt(vElec*vElec / (1 + tanAngle*tanAngle));
 	double vz = vx * tanAngle;

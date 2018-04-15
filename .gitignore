@@ -5,3 +5,7 @@ Debug*
 Release*
 teste/*
 *.o
+*.gnu
+*.xlsx
+
+

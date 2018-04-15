@@ -207,4 +207,29 @@ void Simulation::printPositionsAndVelocities(
 		posVelFile_ << x[i] << " ; " << v[i] << " ; ";
 	}
 	posVelFile_ << endl;
+
+	/* MOMENTO ANGULAR
+	LxE1 =(I2*R2-Q2*J2)
+	LyE1 =(Q2*B2-A2*R2)
+	LzE1 =A2*J2-I2*B2
+	LxE2 =M2*V2-U2*N2
+	LyE2 =U2*F2-E2*V2
+	LzE2 =E2*N2-M2*F2
+	LxP1 =(K2*T2-S2*L2)*1836.15273443449
+	LyP1 =(S2*D2-C2*T2)*1836.15273443449
+	LzP1 =(C2*L2-K2*D2)*1836.15273443449
+	LxP2 =(O2*X2-W2*P2)*1836.15273443449
+	LyP2 =(W2*H2-X2*G2)*1836.15273443449
+	LzP2 =(G2*P2-O2*H2)*1836.15273443449
+
+	LxTOTAL =AJ2+AG2+AD2+AA2
+	LyTOTAL =AK2+AH2+AE2+AB2
+	LzTOTAL =AL2+AI2+AF2+AC2
+
+	L =RAIZ(AN2*AN2+AO2*AO2+AP2*AP2)
+
+	*/
+
+
+
 }

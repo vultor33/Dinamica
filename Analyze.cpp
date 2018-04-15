@@ -49,7 +49,7 @@ void Analyze::chargeDistribution(string fileName)
 	results_.open("electronPlot.csv");
 	ofstream rppGraph_("rppGraph.csv");
 	ofstream yTraject_("yTrajectory.csv");
-	vector<int> countHisto(12);
+	vector<int> countHisto(17);
 	for (size_t i = 0; i < countHisto.size(); i++)
 		countHisto[i] = 0;
 	double rppMean = 0.0e0;
@@ -144,6 +144,8 @@ void Analyze::chargeDistribution(string fileName)
 		iMidAmpl = kRpp;
 	}
 
+
+	/*
 	results_ << "-0.5-  " << countHisto[0] << endl;
 	results_ << "-0.5a-0.3  " << countHisto[1] << endl;
 	results_ << "-0.3a-0.1  " << countHisto[2] << endl;
@@ -156,34 +158,39 @@ void Analyze::chargeDistribution(string fileName)
 	results_ << "1.1a1.3  " << countHisto[9] << endl;
 	results_ << "1.3a1.5  " << countHisto[10] << endl;
 	results_ << "1.5+  " << countHisto[11] << endl;
+	*/
+	results_ << "-0.25- " << countHisto[0] << endl;
+	results_ << "-0.25to-0.15 " << countHisto[1] << endl;
+	results_ << "-0.15to-0.05 " << countHisto[2] << endl;
+	results_ << "-0.05to0.05 " << countHisto[3] << endl;
+	results_ << "0.05to0.15 " << countHisto[4] << endl;
+	results_ << "0.15to0.25 " << countHisto[5] << endl;
+	results_ << "0.25to0.35 " << countHisto[6] << endl;
+	results_ << "0.35to0.45 " << countHisto[7] << endl;
+	results_ << "0.45to0.55 " << countHisto[8] << endl;
+	results_ << "0.55to0.65 " << countHisto[9] << endl;
+	results_ << "0.65to0.75 " << countHisto[10] << endl;
+	results_ << "0.75to0.85 " << countHisto[11] << endl;
+	results_ << "0.85to0.95 " << countHisto[12] << endl;
+	results_ << "0.95to1.05 " << countHisto[13] << endl;
+	results_ << "1.05to1.15 " << countHisto[14] << endl;
+	results_ << "1.15to1.25 " << countHisto[15] << endl;
+	results_ << "1.25+ " << countHisto[16] << endl;
+
 	results_ << endl;
 	rppGraph_.close();
 
 	cout << endl << endl;
 	double amplMeanValue = 0.0e0;
 	for (size_t i = 1; i < amplMax.size(); i++)
-	{
 		amplMeanValue += (amplMax[i] - amplMax[i - 1]);
-	}
+
 	amplMeanValue /= (double)(amplMax.size() - 1);
 
 	results_ << "r mean: " << rppMean / allMol.size() << endl;
 	results_ << "periodo oscilacao:  " << amplMeanValue << endl;
-
-
-
-
-	
-	
-	
 	
 	results_.close();
-	
-
-
-
-
-
 }
 
 vector< vector<CoordXYZ> > Analyze::readSimulationInput(string fileName)
@@ -219,30 +226,68 @@ vector< vector<CoordXYZ> > Analyze::readSimulationInput(string fileName)
 
 void Analyze::addToCount(vector<int> &countHisto, double proj, double rpp)
 {
+	/*
 	if (proj < -0.5e0 * rpp)
 		countHisto[0]++;
-	else if ((proj > -0.5e0 * rpp) && (proj < -0.3e0 * rpp))
+	else if ((proj >= -0.5e0 * rpp) && (proj < -0.3e0 * rpp))
 		countHisto[1]++;
-	else if ((proj > -0.3e0 * rpp) && (proj < -0.1e0 * rpp))
+	else if ((proj >= -0.3e0 * rpp) && (proj < -0.1e0 * rpp))
 		countHisto[2]++;
-	else if ((proj > -0.1e0 * rpp) && (proj < 0.1e0 * rpp))
+	else if ((proj >= -0.1e0 * rpp) && (proj < 0.1e0 * rpp))
 		countHisto[3]++;
-	else if ((proj > 0.1e0 * rpp) && (proj < 0.3e0 * rpp))
+	else if ((proj >= 0.1e0 * rpp) && (proj < 0.3e0 * rpp))
 		countHisto[4]++;
-	else if ((proj > 0.3e0 * rpp) && (proj < 0.5e0 * rpp))
+	else if ((proj >= 0.3e0 * rpp) && (proj < 0.5e0 * rpp))
 		countHisto[5]++;
-	else if ((proj > 0.5e0 * rpp) && (proj < 0.7e0 * rpp))
+	else if ((proj >= 0.5e0 * rpp) && (proj < 0.7e0 * rpp))
 		countHisto[6]++;
-	else if ((proj > 0.7e0 * rpp) && (proj < 0.9e0 * rpp))
+	else if ((proj >= 0.7e0 * rpp) && (proj < 0.9e0 * rpp))
 		countHisto[7]++;
-	else if ((proj > 0.9e0 * rpp) && (proj < 1.1e0 * rpp))
+	else if ((proj >= 0.9e0 * rpp) && (proj < 1.1e0 * rpp))
 		countHisto[8]++;
-	else if ((proj > 1.1e0 * rpp) && (proj < 1.3e0 * rpp))
+	else if ((proj >= 1.1e0 * rpp) && (proj < 1.3e0 * rpp))
 		countHisto[9]++;
-	else if ((proj > 1.3e0 * rpp) && (proj < 1.5e0 * rpp))
+	else if ((proj >= 1.3e0 * rpp) && (proj < 1.5e0 * rpp))
 		countHisto[10]++;
-	else if (proj > 1.5e0 * rpp)
+	else if (proj >= 1.5e0 * rpp)
 		countHisto[11]++;
+		*/
+
+	if (proj < -0.25e0 * rpp)
+		countHisto[0]++;
+	else if ((proj >= -0.25e0 * rpp) && (proj < -0.15e0 * rpp))
+		countHisto[1]++;
+	else if ((proj >= -0.15e0 * rpp) && (proj < -0.05e0 * rpp))
+		countHisto[2]++;
+	else if ((proj >= -0.05e0 * rpp) && (proj < 0.05e0 * rpp))
+		countHisto[3]++;
+	else if ((proj >= 0.05e0 * rpp) && (proj < 0.15e0 * rpp))
+		countHisto[4]++;
+	else if ((proj >= 0.15e0 * rpp) && (proj < 0.25e0 * rpp))
+		countHisto[5]++;
+	else if ((proj >= 0.25e0 * rpp) && (proj < 0.35e0 * rpp))
+		countHisto[6]++;
+	else if ((proj >= 0.35e0 * rpp) && (proj < 0.45e0 * rpp))
+		countHisto[7]++;
+	else if ((proj >= 0.45e0 * rpp) && (proj < 0.55e0 * rpp))
+		countHisto[8]++;
+	else if ((proj >= 0.55e0 * rpp) && (proj < 0.65e0 * rpp))
+		countHisto[9]++;
+	else if ((proj >= 0.65e0 * rpp) && (proj < 0.75e0 * rpp))
+		countHisto[10]++;
+	else if ((proj >= 0.75e0 * rpp) && (proj < 0.85e0 * rpp))
+		countHisto[11]++;
+	else if ((proj >= 0.85e0 * rpp) && (proj < 0.95e0 * rpp))
+		countHisto[12]++;
+	else if ((proj >= 0.95e0 * rpp) && (proj < 1.05e0 * rpp))
+		countHisto[13]++;
+	else if ((proj >= 1.05e0 * rpp) && (proj < 1.15e0 * rpp))
+		countHisto[14]++;
+	else if ((proj >= 1.15e0 * rpp) && (proj < 1.25e0 * rpp))
+		countHisto[15]++;
+	else if (proj >= 1.25e0 * rpp)
+		countHisto[16]++;
+
 
 }
 

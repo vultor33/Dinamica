@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 
 		Simulation tacaMagia;
 		tacaMagia.additionalOptions("printMovie", true);
-		tacaMagia.additionalOptions("printEnergy", false);
+		tacaMagia.additionalOptions("printEnergy", true);
 		tacaMagia.additionalOptions("printPosVel", true);
 		tacaMagia.startSimulation(seed, tempKelvin, impactFactorAu, simulationType);
 
