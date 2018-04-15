@@ -8,33 +8,20 @@
 #include <vector>
 #include <iostream>
 #include <cmath>
+#include <stdlib.h>
 
 #include "GenerateAtom.h"
 #include "Integrator.h"
+#include "DynamicsStructs.h"
 
 using namespace std;
 
-Simulation::Simulation()
+Simulation::Simulation(DymOptions & dymOptions_in)
 {
-	timeStep = 0.01e0;
-	// 5000000 it * print
-	iterationLoop = 1000;
-	printLoop = 300;
-	//initialDistance = 5.0e0;
-	initialDistance = 0.0e0;
-	impactParameter = 1.0e0;
-	initialSpeed = 0.001;
-	checkStopSimulationConditions = true;
+	dymOptions_ = dymOptions_in;
+
 	stopSimulation = false;
-	printEnergy = false;
-	simmetrize = false;
-	printMovie = false;
-	printPosVel = true;
-	maxStopSimulationDistance = 100.0e0;
-	temperatureUnit = 315774.64e0;
-	mProton = 1836.15273443449e0;
-	outputName = "simulacao.xyz";
-	// CENTRO DE MASSA MEXENDO UM POUCO (10^-13)
+
 }
 
 Simulation::~Simulation(){}
@@ -46,9 +33,7 @@ void Simulation::startSimulation(
 	int simulationType
 )
 {
-	initialVelocityKinecticTheory(tempKelvin);
-	impactParameter = impactFactorAu;
-	GenerateAtom genAtom_(seed);
+	GenerateAtom genAtom_(dymOptions_.seed);
 	vector<double> x, v, atomsMass, atomsCharge;
 	switch (simulationType)
 	{
@@ -74,40 +59,39 @@ void Simulation::startSimulation(
 
 	case 5:
 		genAtom_.generateTwoAntiSymmetricAtoms(x, v, atomsMass, atomsCharge);
-		simmetrize = true;
+		dymOptions_.symmetrize = true;
 		break;
 
 	case 6:
 		genAtom_.generateBohrMolecule(x, v, atomsMass, atomsCharge);
-		simmetrize = true;
+		dymOptions_.symmetrize = true;
 		break;
-		
 
 	default:
 		cout << "simulation type not found" << endl;
 		exit(1);
 		break;
 	}
-	x[0] -= initialDistance;
-	x[1] -= initialDistance;
-	x[4] += impactParameter;
-	x[5] += impactParameter;
-	v[0] += initialSpeed;
-	v[1] += initialSpeed;
-	v[2] -= initialSpeed;
-	v[3] -= initialSpeed;
+	x[0] -= dymOptions_.initialDistance;
+	x[1] -= dymOptions_.initialDistance;
+	x[4] += dymOptions_.impactParameter;
+	x[5] += dymOptions_.impactParameter;
+	v[0] += dymOptions_.initialSpeed;
+	v[1] += dymOptions_.initialSpeed;
+	v[2] -= dymOptions_.initialSpeed;
+	v[3] -= dymOptions_.initialSpeed;
 	genAtom_.translateToCenterOfMass(x, atomsMass);
 
 	Integrator rk_;
 	rk_.setAdditionalParams(atomsMass, atomsCharge);
-	rk_.setOptions(printEnergy, simmetrize);
+	rk_.setOptions(dymOptions_.printEnergy, dymOptions_.symmetrize);
 
-	if (printMovie)
+	if (dymOptions_.printMovie)
 	{
-		remove(outputName.c_str());
-		printCoulombAtoms(x, outputName, atomsCharge);
+		remove(dymOptions_.outName.c_str());
+		printCoulombAtoms(x, dymOptions_.outName, atomsCharge);
 	}
-	if (printPosVel)
+	if (dymOptions_.printPosVel)
 	{
 		stringstream buildName;
 		buildName << seed << "-"
@@ -122,25 +106,25 @@ void Simulation::startSimulation(
 			<< " zE1 ; vzE1 ; zP1 ; vzP1 ; zE2 ; vzE2; zP2 ; vzP2 "
 			<< endl;
 	}
-	if (printPosVel)
+	if (dymOptions_.printPosVel)
 		printPositionsAndVelocities(x, v, posVel_);
-	for (int i = 0; i < printLoop; i++)
+	for (int i = 0; i < dymOptions_.printLoop; i++)
 	{
-		for (int j = 0; j < iterationLoop; j++)
+		for (int j = 0; j < dymOptions_.iterationLoop; j++)
 		{
-			rk_.rungeKuttaSimetrico(x, v, timeStep);
+			rk_.rungeKuttaSimetrico(x, v, dymOptions_.timeStep);
 		}
-		if (checkStopSimulationConditions)
+		if (dymOptions_.checkStopSimulationConditions)
 			checkStopSimulation(x);
 		if (stopSimulation)
 			break;
-		if (printPosVel)
+		if (dymOptions_.printPosVel)
 			printPositionsAndVelocities(x, v, posVel_);
 
-		if (printMovie)
+		if (dymOptions_.printMovie)
 		{
-			cout << 100 * i / printLoop << " %" << endl; ;
-			printCoulombAtoms(x, outputName, atomsCharge);
+			cout << 100 * i / dymOptions_.printLoop << " %" << endl; ;
+			printCoulombAtoms(x, dymOptions_.outName, atomsCharge);
 		}
 	}
 
@@ -149,11 +133,11 @@ void Simulation::startSimulation(
 void Simulation::additionalOptions(string flag, bool option)
 {
 	if (flag == "printMovie")
-		printMovie = option;
+		dymOptions_.printMovie = option;
 	else if (flag == "printEnergy")
-		printEnergy = option;
+		dymOptions_.printEnergy = option;
 	else if (flag == "printPosVel")
-		printPosVel = option;
+		dymOptions_.printPosVel = option;
 	else
 	{
 		cout << "flag not found" << endl;
@@ -161,18 +145,12 @@ void Simulation::additionalOptions(string flag, bool option)
 	}
 }
 
-void Simulation::initialVelocityKinecticTheory(double TempKelvin)
-{
-	// v = sqrt( 3 k t / m)
-	// i am suggested this half factor
-	double TempAUnits = TempKelvin / temperatureUnit;
-	initialSpeed = sqrt(3.0e0 * TempAUnits / (1.0e0 + mProton)) / 2.0e0;
-}
+
 void Simulation::checkStopSimulation(vector<double> & x)
 {
 	for (size_t i = 0; i < x.size(); i++)
 	{
-		if (abs(x[i]) > maxStopSimulationDistance)
+		if (abs(x[i]) > dymOptions_.maxStopSimulationDistance)
 			stopSimulation = true;
 	}
 }

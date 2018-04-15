@@ -8,16 +8,23 @@
 #include <string>
 #include <sstream>
 
+#include "DynamicsStructs.h"
 #include "Simulation.h"
 #include "Analyze.h"
 
 using namespace std;
 
-void runSimulations(int seedInitial, int seedFinal, double impacFactorAu, double tempKelvin);
+//void runSimulations(int seedInitial, int seedFinal, double impacFactorAu, double tempKelvin);
 
-void runSimulationsSymmetric(int seedInitial, int seedFinal, double impacFactorAu, double tempKelvin);
+//void runSimulationsSymmetric(int seedInitial, int seedFinal, double impacFactorAu, double tempKelvin);
 
-void generateSeeds(); // GENERATE A LOT OF INITIAL CONDITIONS
+//void generateSeeds(); // GENERATE A LOT OF INITIAL CONDITIONS
+
+DymOptions generateDefaultOptions();
+
+double initialVelocityKinecticTheory(double TempKelvin);
+
+double mProton = 1836.15273443449e0;
 
 int main(int argc, char *argv[])
 {
@@ -31,15 +38,14 @@ int main(int argc, char *argv[])
 		impactFactorAu = 0.5e0;
 		simulationType = 5;
 		*/
-		seed = time(NULL);
+		seed = (int)time(NULL);
 		tempKelvin = 0.0e0;
 		impactFactorAu = 0.0e0;
 		simulationType = 6;
 
-		Simulation tacaMagia;
-		tacaMagia.additionalOptions("printMovie", true);
-		tacaMagia.additionalOptions("printEnergy", true);
-		tacaMagia.additionalOptions("printPosVel", true);
+		DymOptions dymOptions_ = generateDefaultOptions();
+		
+		Simulation tacaMagia(dymOptions_);
 		tacaMagia.startSimulation(seed, tempKelvin, impactFactorAu, simulationType);
 
 		Analyze an_;
@@ -47,6 +53,7 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
+		/*
 		string simlationType = argv[1];
 		int seedI, seedF;
 		if (simlationType == "run")
@@ -90,9 +97,58 @@ int main(int argc, char *argv[])
 			Analyze an_;
 			an_.takeChargeDistribution();
 		}
+		*/
 	}
 	return 0;
 }
+
+
+DymOptions generateDefaultOptions()
+{
+	DymOptions dymOptionsDefault;
+
+	dymOptionsDefault.outName = "simulacao.xyz";
+
+	//simulation type and steps
+	dymOptionsDefault.iterationLoop = 1000;
+	dymOptionsDefault.printLoop = 300;
+	dymOptionsDefault.timeStep = 0.01e0;
+
+	//stop when particcles is too far
+	dymOptionsDefault.checkStopSimulationConditions = true;
+	dymOptionsDefault.maxStopSimulationDistance = 100.0e0;
+
+	//activate symmetrization
+	dymOptionsDefault.symmetrize = false;
+
+	//print options
+	dymOptionsDefault.printEnergy = false;
+	dymOptionsDefault.printPosVel = false;
+	dymOptionsDefault.printMovie = true;
+
+	//initial conditions options
+	dymOptionsDefault.seed = 3;
+	dymOptionsDefault.integratorOption = 0; //simulationType
+	dymOptionsDefault.initialDistance = 5.0e0;
+	dymOptionsDefault.impactParameter = 0.5e0;
+	dymOptionsDefault.initialSpeed = initialVelocityKinecticTheory(300.0e0);
+
+	return dymOptionsDefault;
+
+}
+
+
+
+double initialVelocityKinecticTheory(double TempKelvin)
+{
+	// v = sqrt( 3 k t / m) - gas kinetic theory
+	double temperatureUnit = 315774.64e0;
+	double TempAUnits = TempKelvin / temperatureUnit;
+	return sqrt(3.0e0 * TempAUnits / (1.0e0 + mProton));
+}
+
+
+/*
 
 void runSimulations(int seedInitial, int seedFinal, double impacFactorAu, double tempKelvin)
 {
@@ -130,7 +186,7 @@ void generateSeeds()
 	system("chmod u+x roda.x");
 }
 
-
+*/
 
 /*
 DIDNT WORKED

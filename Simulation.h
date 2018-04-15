@@ -1,26 +1,37 @@
-#ifndef FITNESS_H
-#define FITNESS_H
+#ifndef SIMULATION_H
+#define SIMULATION_H
 
 #include <vector>
 #include <string>
 #include <fstream>
 
+#include "DynamicsStructs.h"
+
 class Simulation
 {
 public:
-	Simulation();
+	Simulation(DymOptions &dymOptions_in);
 	~Simulation();
 
+	/*
 	void startSimulation(
 		int seed,
 		double tempKelvin,
 		double impactFactorAu,
 		int simulationType
 	);
+	*/
 
 	void additionalOptions(std::string flag, bool option);
 
 private:
+	DymOptions dymOptions_;
+
+	std::ofstream posVel_;
+
+	bool stopSimulation;
+
+	/*
 	double timeStep;
 	int iterationLoop;
 	int printLoop;
@@ -28,7 +39,6 @@ private:
 	double impactParameter;
 	double initialSpeed;
 	bool checkStopSimulationConditions;
-	bool stopSimulation;
 	bool printEnergy;
 	bool simmetrize;
 	bool printMovie;
@@ -37,7 +47,8 @@ private:
 	double temperatureUnit;
 	double mProton;
 	std::string outputName;
-	std::ofstream posVel_;
+	*/
+
 
 	void checkStopSimulation(std::vector<double> &x);
 
@@ -51,8 +62,9 @@ private:
 		std::vector<double> &v,
 		std::ofstream &posVelFile_);
 
-	void initialVelocityKinecticTheory(double TempKelvin);
+//	void initialVelocityKinecticTheory(double TempKelvin);
 
 };
 
 #endif
+
