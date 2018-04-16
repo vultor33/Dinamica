@@ -12,17 +12,21 @@ int main(int argc, char *argv[])
 	if (argc < 2)
 	{
 		ReadDymInput readDym_;
-		DymOptions dymOptions_ = readDym_.generateDefaultOptions();
-		dymOptions_.seed = (int)time(NULL);
-		srand(dymOptions_.seed);
+		readDym_.addIToName(3);
+		DymOptions dymOptions_ = readDym_.getDymOptions();
 		dymOptions_.simulationType = 6;
-		dymOptions_.timeStep = 0.0001;
 
-		Simulation tacaMagia(dymOptions_);
-		tacaMagia.startSimulation();
+		if (dymOptions_.simulationType < 6)
+		{
+			dymOptions_.seed = (int)time(NULL);
+			srand(dymOptions_.seed);
+		}
+
+		Simulation sim(dymOptions_);
+		sim.startSimulation();
 
 		Analyze an_;
-		an_.chargeDistribution(dymOptions_.outName);
+		an_.chargeDistribution(dymOptions_);
 	}
 	return 0;
 }

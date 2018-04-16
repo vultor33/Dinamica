@@ -5,6 +5,7 @@
 #include <string>
 
 #include "Coordstructs.h"
+#include "DynamicsStructs.h"
 
 class Analyze
 {
@@ -16,7 +17,7 @@ public:
 
 	void takeReactedResults();
 
-	void chargeDistribution(std::string fileName);
+	void chargeDistribution(DymOptions &dymOptions_);
 
 private:
 	std::vector< std::vector<CoordXYZ> > readSimulationInput(std::string fileName);
@@ -26,10 +27,6 @@ private:
 	std::string takeStringUntilCharacter(std::string &entryString, std::string referenceCharacter);
 
 	void printCoulombAtoms(std::vector<double> & atoms, std::string testName, std::vector<double> &atomsCharge);
-
-	//data
-	double bondDistanceCut;
-
 
 
 

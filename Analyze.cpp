@@ -10,13 +10,11 @@
 
 #include "Coordstructs.h"
 #include "AuxMath.h"
+#include "DynamicsStructs.h"
 
 using namespace std;
 
-Analyze::Analyze()
-{
-	bondDistanceCut = 2.5e0;
-}
+Analyze::Analyze(){}
 
 Analyze::~Analyze(){}
 
@@ -32,8 +30,8 @@ void Analyze::takeChargeDistribution()
 		string simulFlag = takeStringUntilCharacter(name, ".");
 		if (name == "xyz")
 		{
-			string fullName = simulFlag + "." + name;
-			chargeDistribution(fullName);
+			//string fullName = simulFlag + "." + name;
+			//chargeDistribution(fullName);
 		}
 	}
 
@@ -41,14 +39,17 @@ void Analyze::takeChargeDistribution()
 }
 
 
-void Analyze::chargeDistribution(string fileName)
+void Analyze::chargeDistribution(DymOptions &dymOptions_)	
 {
-	vector< vector<CoordXYZ> > allMol = readSimulationInput(fileName);
-	ofstream results_;
-	//results_.open("electronPlot.csv", std::ofstream::out | std::ofstream::app);
-	results_.open("electronPlot.csv");
-	ofstream rppGraph_("rppGraph.csv");
-	ofstream yTraject_("yTrajectory.csv");
+	vector< vector<CoordXYZ> > allMol = readSimulationInput(dymOptions_.outName);
+	ofstream results_, rppGraph_, yTraject_;
+	if (dymOptions_.plotAnalyzeGraphs)
+	{
+		results_.open((dymOptions_.outName + "electronPlot.csv").c_str());
+		rppGraph_.open((dymOptions_.outName + "rppGraph.csv").c_str());
+		yTraject_.open((dymOptions_.outName + "yTrajectory.csv").c_str());
+	}
+
 	vector<int> countHisto(17);
 	for (size_t i = 0; i < countHisto.size(); i++)
 		countHisto[i] = 0;
@@ -68,71 +69,7 @@ void Analyze::chargeDistribution(string fileName)
 			+ (allMol[i][1].y - allMol[i][3].y)*(allMol[i][1].y - allMol[i][3].y)
 			+ (allMol[i][1].z - allMol[i][3].z)*(allMol[i][1].z - allMol[i][3].z));
 		rppMean += rpp;
-
-		/* plot rpp all
-		if (i % 100 == 0)
-		{
-			rppGraph_ << kRpp << " ; " << rpp << endl;
-			kRpp++;
-		}
-		*/
-
-//		if (rpp < bondDistanceCut) //apagar
-
-		vector<double> vecPP(3);
-		vecPP[0] = -allMol[i][3].x + allMol[i][1].x;
-		vecPP[1] = -allMol[i][3].y + allMol[i][1].y;
-		vecPP[2] = -allMol[i][3].z + allMol[i][1].z;
-		vector<double> vecEP1(3);
-		vecEP1[0] = -allMol[i][0].x + allMol[i][1].x;
-		vecEP1[1] = -allMol[i][0].y + allMol[i][1].y;
-		vecEP1[2] = -allMol[i][0].z + allMol[i][1].z;
-		vector<double> vecEP2(3);
-		vecEP2[0] = -allMol[i][2].x + allMol[i][1].x;
-		vecEP2[1] = -allMol[i][2].y + allMol[i][1].y;
-		vecEP2[2] = -allMol[i][2].z + allMol[i][1].z;
-
-
-		if (i == 0)
-		{
-			rpp0 = rpp;
-		}
-
-
-		AuxMath auxMath_;
-		double prodEsc = auxMath_.escalarProduct(
-			vecPP[0], vecPP[1], vecPP[2],
-			vecEP1[0], vecEP1[1], vecEP1[2]);
-		double prodEsc2 = auxMath_.escalarProduct(
-			vecPP[0], vecPP[1], vecPP[2],
-			vecEP2[0], vecEP2[1], vecEP2[2]);
-
-		addToCount(countHisto, prodEsc / rpp, rpp);
-		addToCount(countHisto, prodEsc2 / rpp, rpp);
-
-		// y projection
-		// proj vector
-
-
-		double projJOnEpp = vecPP[1] / rpp;
-		vector<double> vProjJOnEpp(3);
-		vProjJOnEpp[0] = projJOnEpp * vecPP[0] / rpp;
-		vProjJOnEpp[1] = projJOnEpp * vecPP[1] / rpp;
-		vProjJOnEpp[2] = projJOnEpp * vecPP[2] / rpp;
-		vector<double> ppPerpendicular(3);
-		ppPerpendicular[0] = -vProjJOnEpp[0];
-		ppPerpendicular[1] = 1.0e0 - vProjJOnEpp[1];
-		ppPerpendicular[2] = -vProjJOnEpp[2];
-		double normPerp = auxMath_.norm(ppPerpendicular[0], ppPerpendicular[1], ppPerpendicular[2]);
-
-		double yProj = auxMath_.escalarProduct(
-			ppPerpendicular[0], ppPerpendicular[1], ppPerpendicular[2],
-			vecEP1[0], vecEP1[1], vecEP1[2]) / normPerp;
-
-		yTraject_ << ((prodEsc / rpp) - rpp0 / 2.0e0) << "  " << yProj << endl;
-		rppGraph_ << kRpp << "  " << rpp << endl;
 		kRpp++;
-
 		if ((midAmpl > oldAmpl) && (midAmpl > rpp))
 		{
 			//maximo
@@ -142,43 +79,85 @@ void Analyze::chargeDistribution(string fileName)
 		iOldAmpl = iMidAmpl;
 		midAmpl = rpp;
 		iMidAmpl = kRpp;
+
+
+
+		if (dymOptions_.plotAnalyzeGraphs)
+		{
+			vector<double> vecPP(3);
+			vecPP[0] = allMol[i][3].x - allMol[i][1].x;
+			vecPP[1] = allMol[i][3].y - allMol[i][1].y;
+			vecPP[2] = allMol[i][3].z - allMol[i][1].z;
+			vector<double> vecEP1(3);
+			vecEP1[0] = allMol[i][0].x - allMol[i][1].x;
+			vecEP1[1] = allMol[i][0].y - allMol[i][1].y;
+			vecEP1[2] = allMol[i][0].z - allMol[i][1].z;
+			vector<double> vecEP2(3);
+			vecEP2[0] = allMol[i][2].x - allMol[i][1].x;
+			vecEP2[1] = allMol[i][2].y - allMol[i][1].y;
+			vecEP2[2] = allMol[i][2].z - allMol[i][1].z;
+
+			if (i == 0)
+			{
+				rpp0 = rpp;
+			}
+
+			AuxMath auxMath_;
+			double prodEsc = auxMath_.escalarProduct(
+				vecPP[0], vecPP[1], vecPP[2],
+				vecEP1[0], vecEP1[1], vecEP1[2]);
+			double prodEsc2 = auxMath_.escalarProduct(
+				vecPP[0], vecPP[1], vecPP[2],
+				vecEP2[0], vecEP2[1], vecEP2[2]);
+
+			addToCount(countHisto, prodEsc / rpp, rpp);
+			addToCount(countHisto, prodEsc2 / rpp, rpp);
+
+			double projJOnEpp = vecPP[1] / rpp;
+			vector<double> vProjJOnEpp(3);
+			vProjJOnEpp[0] = projJOnEpp * vecPP[0] / rpp;
+			vProjJOnEpp[1] = projJOnEpp * vecPP[1] / rpp;
+			vProjJOnEpp[2] = projJOnEpp * vecPP[2] / rpp;
+			vector<double> ppPerpendicular(3);
+			ppPerpendicular[0] = -vProjJOnEpp[0];
+			ppPerpendicular[1] = 1.0e0 - vProjJOnEpp[1];
+			ppPerpendicular[2] = -vProjJOnEpp[2];
+			double normPerp = auxMath_.norm(ppPerpendicular[0], ppPerpendicular[1], ppPerpendicular[2]);
+
+			double yProj = auxMath_.escalarProduct(
+				ppPerpendicular[0], ppPerpendicular[1], ppPerpendicular[2],
+				vecEP1[0], vecEP1[1], vecEP1[2]) / normPerp;
+
+			yTraject_ << ((prodEsc / rpp) - rpp0 / 2.0e0) / rpp << "  " << yProj << endl;
+			rppGraph_ << kRpp << "  " << rpp << endl;
+		}
+
 	}
 
+	if (dymOptions_.plotAnalyzeGraphs)
+	{
+		results_ << "-0.25- " << countHisto[0] << endl;
+		results_ << "-0.25to-0.15 " << countHisto[1] << endl;
+		results_ << "-0.15to-0.05 " << countHisto[2] << endl;
+		results_ << "-0.05to0.05 " << countHisto[3] << endl;
+		results_ << "0.05to0.15 " << countHisto[4] << endl;
+		results_ << "0.15to0.25 " << countHisto[5] << endl;
+		results_ << "0.25to0.35 " << countHisto[6] << endl;
+		results_ << "0.35to0.45 " << countHisto[7] << endl;
+		results_ << "0.45to0.55 " << countHisto[8] << endl;
+		results_ << "0.55to0.65 " << countHisto[9] << endl;
+		results_ << "0.65to0.75 " << countHisto[10] << endl;
+		results_ << "0.75to0.85 " << countHisto[11] << endl;
+		results_ << "0.85to0.95 " << countHisto[12] << endl;
+		results_ << "0.95to1.05 " << countHisto[13] << endl;
+		results_ << "1.05to1.15 " << countHisto[14] << endl;
+		results_ << "1.15to1.25 " << countHisto[15] << endl;
+		results_ << "1.25+ " << countHisto[16] << endl;
 
-	/*
-	results_ << "-0.5-  " << countHisto[0] << endl;
-	results_ << "-0.5a-0.3  " << countHisto[1] << endl;
-	results_ << "-0.3a-0.1  " << countHisto[2] << endl;
-	results_ << "-0.1a0.1  " << countHisto[3] << endl;
-	results_ << "0.1a0.3  " << countHisto[4] << endl;
-	results_ << "0.3a0.5  " << countHisto[5] << endl;
-	results_ << "0.5a0.7  " << countHisto[6] << endl;
-	results_ << "0.7a0.9  " << countHisto[7] << endl;
-	results_ << "0.9a1.1  " << countHisto[8] << endl;
-	results_ << "1.1a1.3  " << countHisto[9] << endl;
-	results_ << "1.3a1.5  " << countHisto[10] << endl;
-	results_ << "1.5+  " << countHisto[11] << endl;
-	*/
-	results_ << "-0.25- " << countHisto[0] << endl;
-	results_ << "-0.25to-0.15 " << countHisto[1] << endl;
-	results_ << "-0.15to-0.05 " << countHisto[2] << endl;
-	results_ << "-0.05to0.05 " << countHisto[3] << endl;
-	results_ << "0.05to0.15 " << countHisto[4] << endl;
-	results_ << "0.15to0.25 " << countHisto[5] << endl;
-	results_ << "0.25to0.35 " << countHisto[6] << endl;
-	results_ << "0.35to0.45 " << countHisto[7] << endl;
-	results_ << "0.45to0.55 " << countHisto[8] << endl;
-	results_ << "0.55to0.65 " << countHisto[9] << endl;
-	results_ << "0.65to0.75 " << countHisto[10] << endl;
-	results_ << "0.75to0.85 " << countHisto[11] << endl;
-	results_ << "0.85to0.95 " << countHisto[12] << endl;
-	results_ << "0.95to1.05 " << countHisto[13] << endl;
-	results_ << "1.05to1.15 " << countHisto[14] << endl;
-	results_ << "1.15to1.25 " << countHisto[15] << endl;
-	results_ << "1.25+ " << countHisto[16] << endl;
-
-	results_ << endl;
-	rppGraph_.close();
+		results_ << endl;
+		rppGraph_.close();
+		results_.close();
+	}
 
 	cout << endl << endl;
 	double amplMeanValue = 0.0e0;
@@ -187,10 +166,11 @@ void Analyze::chargeDistribution(string fileName)
 
 	amplMeanValue /= (double)(amplMax.size() - 1);
 
-	results_ << "r mean: " << rppMean / allMol.size() << endl;
-	results_ << "periodo oscilacao:  " << amplMeanValue << endl;
+	ofstream excelResult_;
+	excelResult_.open(dymOptions_.excelResultsName.c_str(), std::ofstream::out | std::ofstream::app);
+	excelResult_ << dymOptions_.outName << ";" << rppMean / allMol.size() << ";" << amplMeanValue << endl;
+	excelResult_.close();
 	
-	results_.close();
 }
 
 vector< vector<CoordXYZ> > Analyze::readSimulationInput(string fileName)
@@ -226,66 +206,41 @@ vector< vector<CoordXYZ> > Analyze::readSimulationInput(string fileName)
 
 void Analyze::addToCount(vector<int> &countHisto, double proj, double rpp)
 {
-	/*
-	if (proj < -0.5e0 * rpp)
-		countHisto[0]++;
-	else if ((proj >= -0.5e0 * rpp) && (proj < -0.3e0 * rpp))
-		countHisto[1]++;
-	else if ((proj >= -0.3e0 * rpp) && (proj < -0.1e0 * rpp))
-		countHisto[2]++;
-	else if ((proj >= -0.1e0 * rpp) && (proj < 0.1e0 * rpp))
-		countHisto[3]++;
-	else if ((proj >= 0.1e0 * rpp) && (proj < 0.3e0 * rpp))
-		countHisto[4]++;
-	else if ((proj >= 0.3e0 * rpp) && (proj < 0.5e0 * rpp))
-		countHisto[5]++;
-	else if ((proj >= 0.5e0 * rpp) && (proj < 0.7e0 * rpp))
-		countHisto[6]++;
-	else if ((proj >= 0.7e0 * rpp) && (proj < 0.9e0 * rpp))
-		countHisto[7]++;
-	else if ((proj >= 0.9e0 * rpp) && (proj < 1.1e0 * rpp))
-		countHisto[8]++;
-	else if ((proj >= 1.1e0 * rpp) && (proj < 1.3e0 * rpp))
-		countHisto[9]++;
-	else if ((proj >= 1.3e0 * rpp) && (proj < 1.5e0 * rpp))
-		countHisto[10]++;
-	else if (proj >= 1.5e0 * rpp)
-		countHisto[11]++;
-		*/
+	proj /= rpp;
 
-	if (proj < -0.25e0 * rpp)
+	if (proj < -0.25e0)
 		countHisto[0]++;
-	else if ((proj >= -0.25e0 * rpp) && (proj < -0.15e0 * rpp))
+	else if ((proj >= -0.25e0) && (proj < -0.15e0))
 		countHisto[1]++;
-	else if ((proj >= -0.15e0 * rpp) && (proj < -0.05e0 * rpp))
+	else if ((proj >= -0.15e0) && (proj < -0.05e0))
 		countHisto[2]++;
-	else if ((proj >= -0.05e0 * rpp) && (proj < 0.05e0 * rpp))
+	else if ((proj >= -0.05e0) && (proj < 0.05e0))
 		countHisto[3]++;
-	else if ((proj >= 0.05e0 * rpp) && (proj < 0.15e0 * rpp))
+	else if ((proj >= 0.05e0) && (proj < 0.15e0))
 		countHisto[4]++;
-	else if ((proj >= 0.15e0 * rpp) && (proj < 0.25e0 * rpp))
+	else if ((proj >= 0.15e0) && (proj < 0.25e0))
 		countHisto[5]++;
-	else if ((proj >= 0.25e0 * rpp) && (proj < 0.35e0 * rpp))
+	else if ((proj >= 0.25e0) && (proj < 0.35e0))
 		countHisto[6]++;
-	else if ((proj >= 0.35e0 * rpp) && (proj < 0.45e0 * rpp))
+	else if ((proj >= 0.35e0) && (proj < 0.45e0))
 		countHisto[7]++;
-	else if ((proj >= 0.45e0 * rpp) && (proj < 0.55e0 * rpp))
+	else if ((proj >= 0.45e0) && (proj < 0.55e0))
 		countHisto[8]++;
-	else if ((proj >= 0.55e0 * rpp) && (proj < 0.65e0 * rpp))
+	else if ((proj >= 0.55e0) && (proj < 0.65e0))
 		countHisto[9]++;
-	else if ((proj >= 0.65e0 * rpp) && (proj < 0.75e0 * rpp))
+	else if ((proj >= 0.65e0) && (proj < 0.75e0))
 		countHisto[10]++;
-	else if ((proj >= 0.75e0 * rpp) && (proj < 0.85e0 * rpp))
+	else if ((proj >= 0.75e0) && (proj < 0.85e0))
 		countHisto[11]++;
-	else if ((proj >= 0.85e0 * rpp) && (proj < 0.95e0 * rpp))
+	else if ((proj >= 0.85e0) && (proj < 0.95e0))
 		countHisto[12]++;
-	else if ((proj >= 0.95e0 * rpp) && (proj < 1.05e0 * rpp))
+	else if ((proj >= 0.95e0) && (proj < 1.05e0))
 		countHisto[13]++;
-	else if ((proj >= 1.05e0 * rpp) && (proj < 1.15e0 * rpp))
+	else if ((proj >= 1.05e0) && (proj < 1.15e0))
 		countHisto[14]++;
-	else if ((proj >= 1.15e0 * rpp) && (proj < 1.25e0 * rpp))
+	else if ((proj >= 1.15e0) && (proj < 1.25e0))
 		countHisto[15]++;
-	else if (proj >= 1.25e0 * rpp)
+	else if (proj >= 1.25e0)
 		countHisto[16]++;
 
 

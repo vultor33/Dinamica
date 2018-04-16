@@ -24,6 +24,10 @@ struct DymOptions
 	bool printMovie;
 	bool printPosVel;
 
+	//analyze options
+	std::string excelResultsName;
+	bool plotAnalyzeGraphs;
+
 	//initial conditions options
 	int simulationType;
 	double initialDistance;

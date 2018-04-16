@@ -10,9 +10,14 @@ public:
 
 	~ReadDymInput();
 
-	DymOptions generateDefaultOptions();
+	DymOptions getDymOptions();
+
+	void addIToName(int i);
 
 private:
+	DymOptions dymOptions_;
+
+	void generateDefaultOptions();
 
 	double initialVelocityKinecticTheory(double tempKelvin);
 

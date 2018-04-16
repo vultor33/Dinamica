@@ -1,27 +1,38 @@
 #include "ReadDymInput.h"
 
 #include <string>
+#include <sstream>
 
 #include "DynamicsStructs.h"
 
 using namespace std;
 
-ReadDymInput::ReadDymInput(){}
+ReadDymInput::ReadDymInput()
+{
+	generateDefaultOptions();
+}
 
 ReadDymInput::~ReadDymInput(){}
 
-DymOptions ReadDymInput::generateDefaultOptions()
+DymOptions ReadDymInput::getDymOptions()
+{
+	return dymOptions_;
+}
+
+void ReadDymInput::addIToName(int i)
+{
+	stringstream convert;
+	convert << i;
+	dymOptions_.outName = "simulation-" + convert.str() + ".xyz";
+}
+
+
+void ReadDymInput::generateDefaultOptions()
 {
 	DymOptions dymOptionsDefault;
 
-	dymOptionsDefault.outName = "simulacao.xyz";
+	dymOptionsDefault.outName = "simulation.xyz";
 
-	//simulation type and steps
-	/*
-	dymOptionsDefault.iterationLoop = 1000;
-	dymOptionsDefault.printLoop = 300;
-	dymOptionsDefault.timeStep = 0.01e0;
-	*/
 	dymOptionsDefault.iterationLoop = 1000;
 	dymOptionsDefault.printLoop = 300;
 	dymOptionsDefault.timeStep = 0.01e0;
@@ -34,9 +45,13 @@ DymOptions ReadDymInput::generateDefaultOptions()
 	dymOptionsDefault.symmetrize = false;
 
 	//print options
-	dymOptionsDefault.printEnergy = true;
-	dymOptionsDefault.printPosVel = true;
+	dymOptionsDefault.printEnergy = false;
+	dymOptionsDefault.printPosVel = false;
 	dymOptionsDefault.printMovie = true;
+
+	//analyze options
+	dymOptionsDefault.excelResultsName = "simulationResults.csv";
+	dymOptionsDefault.plotAnalyzeGraphs = false;
 
 	//initial conditions options
 	dymOptionsDefault.seed = 3;
@@ -45,9 +60,9 @@ DymOptions ReadDymInput::generateDefaultOptions()
 	dymOptionsDefault.impactParameter = 0.5e0;
 	dymOptionsDefault.initialSpeed = initialVelocityKinecticTheory(300.0e0);
 	dymOptionsDefault.energy = -1.17444904341371e0;
-	dymOptionsDefault.angleBohrModel = 5.0e0;
+	dymOptionsDefault.angleBohrModel = 20.0e0;
 
-	return dymOptionsDefault;
+	dymOptions_ = dymOptionsDefault;
 
 }
 
