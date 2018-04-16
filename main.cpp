@@ -1,195 +1,42 @@
-#include <iostream>
-#include <vector>
-#include <string>
-#include <fstream>
-#include <cstdlib>
-#include <cmath>
 #include <time.h>
-#include <string>
-#include <sstream>
 
 #include "DynamicsStructs.h"
+#include "ReadDymInput.h"
 #include "Simulation.h"
 #include "Analyze.h"
 
 using namespace std;
 
-//void runSimulations(int seedInitial, int seedFinal, double impacFactorAu, double tempKelvin);
-
-//void runSimulationsSymmetric(int seedInitial, int seedFinal, double impacFactorAu, double tempKelvin);
-
-//void generateSeeds(); // GENERATE A LOT OF INITIAL CONDITIONS
-
-DymOptions generateDefaultOptions();
-
-double initialVelocityKinecticTheory(double TempKelvin);
-
-double mProton = 1836.15273443449e0;
-
 int main(int argc, char *argv[])
 {
 	if (argc < 2)
 	{
-
-		//tenho q reproduzir um dos meus resultados que mostrei o amary
-
-		DymOptions dymOptions_ = generateDefaultOptions();
-
+		ReadDymInput readDym_;
+		DymOptions dymOptions_ = readDym_.generateDefaultOptions();
 		dymOptions_.seed = (int)time(NULL);
-		
 		srand(dymOptions_.seed);
-
 		dymOptions_.simulationType = 6;
+		dymOptions_.timeStep = 0.0001;
 
 		Simulation tacaMagia(dymOptions_);
 		tacaMagia.startSimulation();
 
 		Analyze an_;
-		an_.chargeDistribution("simulacao.xyz");
-	}
-	else
-	{
-		/*
-		string simlationType = argv[1];
-		int seedI, seedF;
-		if (simlationType == "run")
-		{
-			stringstream convert;
-			convert << argv[2] << " " << argv[3];
-			convert >> seedI >> seedF;
-			runSimulations(seedI, seedF, 0.0e0, 100.0e0);
-			runSimulations(seedI, seedF, 0.0e0, 300.0e0);
-			runSimulations(seedI, seedF, 0.0e0, 1000.0e0);
-			runSimulations(seedI, seedF, 0.5e0, 100.0e0);
-			runSimulations(seedI, seedF, 0.5e0, 300.0e0);
-			runSimulations(seedI, seedF, 0.5e0, 1000.0e0);
-			runSimulations(seedI, seedF, 1.0e0, 100.0e0);
-			runSimulations(seedI, seedF, 1.0e0, 300.0e0);
-			runSimulations(seedI, seedF, 1.0e0, 1000.0e0);
-			runSimulations(seedI, seedF, 1.5e0, 100.0e0);
-			runSimulations(seedI, seedF, 1.5e0, 300.0e0);
-			runSimulations(seedI, seedF, 1.5e0, 1000.0e0);
-		}
-		else if (simlationType == "symmetric")
-		{
-			stringstream convert;
-			convert << argv[2] << " " << argv[3];
-			convert >> seedI >> seedF;
-			runSimulationsSymmetric(seedI, seedF, 0.0e0, 100.0e0);
-			runSimulationsSymmetric(seedI, seedF, 0.0e0, 300.0e0);
-			runSimulationsSymmetric(seedI, seedF, 0.0e0, 1000.0e0);
-			runSimulationsSymmetric(seedI, seedF, 0.5e0, 100.0e0);
-			runSimulationsSymmetric(seedI, seedF, 0.5e0, 300.0e0);
-			runSimulationsSymmetric(seedI, seedF, 0.5e0, 1000.0e0);
-			runSimulationsSymmetric(seedI, seedF, 1.0e0, 100.0e0);
-			runSimulationsSymmetric(seedI, seedF, 1.0e0, 300.0e0);
-			runSimulationsSymmetric(seedI, seedF, 1.0e0, 1000.0e0);
-			runSimulationsSymmetric(seedI, seedF, 1.5e0, 100.0e0);
-			runSimulationsSymmetric(seedI, seedF, 1.5e0, 300.0e0);
-			runSimulationsSymmetric(seedI, seedF, 1.5e0, 1000.0e0);
-		}
-		else if (simlationType == "charge")
-		{
-			Analyze an_;
-			an_.takeChargeDistribution();
-		}
-		*/
+		an_.chargeDistribution(dymOptions_.outName);
 	}
 	return 0;
 }
 
 
-DymOptions generateDefaultOptions()
-{
-	DymOptions dymOptionsDefault;
-
-	dymOptionsDefault.outName = "simulacao.xyz";
-
-	//simulation type and steps
-	/*
-	dymOptionsDefault.iterationLoop = 1000;
-	dymOptionsDefault.printLoop = 300;
-	dymOptionsDefault.timeStep = 0.01e0;
-	*/
-	dymOptionsDefault.iterationLoop = 1000;
-	dymOptionsDefault.printLoop = 300;
-	dymOptionsDefault.timeStep = 0.1e0;
-
-	//stop when particcles is too far
-	dymOptionsDefault.checkStopSimulationConditions = true;
-	dymOptionsDefault.maxStopSimulationDistance = 100.0e0;
-
-	//activate symmetrization
-	dymOptionsDefault.symmetrize = false;
-
-	//print options
-	dymOptionsDefault.printEnergy = false;
-	dymOptionsDefault.printPosVel = false;
-	dymOptionsDefault.printMovie = true;
-
-	//initial conditions options
-	dymOptionsDefault.seed = 3;
-	dymOptionsDefault.simulationType = 0; //simulationType
-	dymOptionsDefault.initialDistance = 5.0e0;
-	dymOptionsDefault.impactParameter = 0.5e0;
-	dymOptionsDefault.initialSpeed = initialVelocityKinecticTheory(300.0e0);
-	dymOptionsDefault.energy = -1.17444904341371e0;
-	dymOptionsDefault.angleBohrModel = 15.0e0;
-
-	return dymOptionsDefault;
-
-}
-
-
-
-double initialVelocityKinecticTheory(double TempKelvin)
-{
-	// v = sqrt( 3 k t / m) - gas kinetic theory
-	double temperatureUnit = 315774.64e0;
-	double TempAUnits = TempKelvin / temperatureUnit;
-	return sqrt(3.0e0 * TempAUnits / (1.0e0 + mProton));
-}
-
-
 /*
-
-void runSimulations(int seedInitial, int seedFinal, double impacFactorAu, double tempKelvin)
-{
-	for (int i = seedInitial; i <= seedFinal; i++)
-	{
-		Simulation dim1, dim2, dim3, dim4, dim5;
-		dim1.startSimulation(i, tempKelvin, impacFactorAu, 0);
-		dim2.startSimulation(i, tempKelvin, impacFactorAu, 1);
-		dim3.startSimulation(i, tempKelvin, impacFactorAu, 2);
-		dim4.startSimulation(i, tempKelvin, impacFactorAu, 3);
-		dim5.startSimulation(i, tempKelvin, impacFactorAu, 4);
-	}
-}
-
-void runSimulationsSymmetric(int seedInitial, int seedFinal, double impacFactorAu, double tempKelvin)
-{
-	for (int i = seedInitial; i <= seedFinal; i++)
-	{
-		Simulation dim1;
-		dim1.startSimulation(i, tempKelvin, impacFactorAu, 5);
-	}
-}
-
-void generateSeeds()
-{
-	int nSeeds = 60;
-	int nProc = 8;
-	ofstream roda_("roda.x");
-	roda_ << "#!/bin/bash" << endl << endl;
-	for (int i = 480; i < 480 + nSeeds * nProc; i += nSeeds)
-	{
-		roda_ << "./drkai.x symmetric " << i + 1 << "  " << i + nSeeds << " & " << endl;
-	}
-	roda_.close();
-	system("chmod u+x roda.x");
-}
-
+gnuplot
+cd "C:\\Users\\frederico\\source\\repos\\Dinamica\\Dinamica"
 */
+
+
+
+
+
 
 /*
 DIDNT WORKED

@@ -233,8 +233,8 @@ void GenerateInitialCoordinates::generateBohrMolecule(
 	double rProton, rElec, vInit;
 	calcBohrParams(energy, rProton, rElec, vInit);
 
-	x1[2] = rProton;
-	x1[5] = rElec;
+	x1[2] = rElec;
+	x1[5] = rProton;
 
 	AuxMath auxMath_;
 	double tanAngle = tan(angle * auxMath_._pi / (180.0e0));
