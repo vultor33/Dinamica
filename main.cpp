@@ -30,23 +30,19 @@ int main(int argc, char *argv[])
 {
 	if (argc < 2)
 	{
-		int seed, simulationType;
-		double tempKelvin, impactFactorAu;
-		/*
-		seed = time(NULL);
-		tempKelvin = 3000e0;
-		impactFactorAu = 0.5e0;
-		simulationType = 5;
-		*/
-		seed = (int)time(NULL);
-		tempKelvin = 0.0e0;
-		impactFactorAu = 0.0e0;
-		simulationType = 6;
+
+		//tenho q reproduzir um dos meus resultados que mostrei o amary
 
 		DymOptions dymOptions_ = generateDefaultOptions();
+
+		dymOptions_.seed = (int)time(NULL);
 		
+		srand(dymOptions_.seed);
+
+		dymOptions_.simulationType = 6;
+
 		Simulation tacaMagia(dymOptions_);
-		tacaMagia.startSimulation(seed, tempKelvin, impactFactorAu, simulationType);
+		tacaMagia.startSimulation();
 
 		Analyze an_;
 		an_.chargeDistribution("simulacao.xyz");
@@ -110,9 +106,14 @@ DymOptions generateDefaultOptions()
 	dymOptionsDefault.outName = "simulacao.xyz";
 
 	//simulation type and steps
+	/*
 	dymOptionsDefault.iterationLoop = 1000;
 	dymOptionsDefault.printLoop = 300;
 	dymOptionsDefault.timeStep = 0.01e0;
+	*/
+	dymOptionsDefault.iterationLoop = 1000;
+	dymOptionsDefault.printLoop = 300;
+	dymOptionsDefault.timeStep = 0.1e0;
 
 	//stop when particcles is too far
 	dymOptionsDefault.checkStopSimulationConditions = true;
@@ -128,10 +129,12 @@ DymOptions generateDefaultOptions()
 
 	//initial conditions options
 	dymOptionsDefault.seed = 3;
-	dymOptionsDefault.integratorOption = 0; //simulationType
+	dymOptionsDefault.simulationType = 0; //simulationType
 	dymOptionsDefault.initialDistance = 5.0e0;
 	dymOptionsDefault.impactParameter = 0.5e0;
 	dymOptionsDefault.initialSpeed = initialVelocityKinecticTheory(300.0e0);
+	dymOptionsDefault.energy = -1.17444904341371e0;
+	dymOptionsDefault.angleBohrModel = 15.0e0;
 
 	return dymOptionsDefault;
 

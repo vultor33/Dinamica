@@ -1,23 +1,85 @@
-#include "GenerateAtom.h"
+#include "GenerateInitialCoordinates.h"
 
 #include <vector>
 #include <cmath>
+#include <iostream>
 
+#include "DynamicsStructs.h"
 #include "AuxMath.h"
 
 using namespace std;
 
-GenerateAtom::GenerateAtom(int seed)
+GenerateInitialCoordinates::GenerateInitialCoordinates()
 {
-	srand(seed);
 	mProton = 1836.15273443449e0;
 	pi_ = 3.1415926535897932384626433832795e0;
 	
 }
 
-GenerateAtom::~GenerateAtom(){}
+GenerateInitialCoordinates::~GenerateInitialCoordinates(){}
 
-vector<double> GenerateAtom::addAtom(
+void GenerateInitialCoordinates::generateInitial(
+	DymOptions &dymOptions_,
+	std::vector<double> &x,
+	std::vector<double> &v,
+	std::vector<double> &atomsMass,
+	std::vector<double> &atomsCharge)
+{
+
+	switch (dymOptions_.simulationType)
+	{
+	case 0:
+		generateTwoRandomAtoms(x, v, atomsMass, atomsCharge);
+		break;
+
+	case 1:
+		generateTwoAntiSymmetricAtoms(x, v, atomsMass, atomsCharge);
+		break;
+
+	case 2:
+		generateTwoIdenticalAntiSymmetricAtoms(x, v, atomsMass, atomsCharge);
+		break;
+
+	case 3:
+		generateTwoSymmetricAtoms(x, v, atomsMass, atomsCharge);
+		break;
+
+	case 4:
+		generateTwoIdenticalSymmetricAtoms(x, v, atomsMass, atomsCharge);
+		break;
+
+	case 5:
+		generateTwoAntiSymmetricAtoms(x, v, atomsMass, atomsCharge);
+		dymOptions_.symmetrize = true;
+		break;
+
+	case 6:
+		generateBohrMolecule(x, v, atomsMass, atomsCharge, dymOptions_.energy, dymOptions_.angleBohrModel);
+		dymOptions_.symmetrize = true;
+		dymOptions_.initialDistance = 0.0e0;
+		dymOptions_.impactParameter = 0.0e0;
+		dymOptions_.initialSpeed = 0.0e0;
+		break;
+
+	default:
+		cout << "simulation type not found" << endl;
+		exit(1);
+		break;
+	}
+	x[0] -= dymOptions_.initialDistance;
+	x[1] -= dymOptions_.initialDistance;
+	x[4] += dymOptions_.impactParameter;
+	x[5] += dymOptions_.impactParameter;
+	v[0] += dymOptions_.initialSpeed;
+	v[1] += dymOptions_.initialSpeed;
+	v[2] -= dymOptions_.initialSpeed;
+	v[3] -= dymOptions_.initialSpeed;
+	translateToCenterOfMass(x, atomsMass);
+
+}
+
+
+vector<double> GenerateInitialCoordinates::addAtom(
 	vector<double> & property1,
 	vector<double> & property2)
 {
@@ -41,14 +103,14 @@ vector<double> GenerateAtom::addAtom(
 	return sum;
 }
 
-vector<double> GenerateAtom::insertVector(vector<double> & vec1, vector<double> &vec2)
+vector<double> GenerateInitialCoordinates::insertVector(vector<double> & vec1, vector<double> &vec2)
 {
 	vector<double> sum = vec1;
 	sum.insert(sum.end(), vec2.begin(), vec2.end());
 	return sum;
 }
 
-void GenerateAtom::generateTwoRandomAtoms(
+void GenerateInitialCoordinates::generateTwoRandomAtoms(
 	std::vector<double> &xPositions,
 	std::vector<double> &vVelocities,
 	std::vector<double> &atomsMass,
@@ -63,7 +125,7 @@ void GenerateAtom::generateTwoRandomAtoms(
 	atomCharge = insertVector(aC1, aC2);
 }
 
-void GenerateAtom::generateTwoSymmetricAtoms(
+void GenerateInitialCoordinates::generateTwoSymmetricAtoms(
 	std::vector<double> &xPositions,
 	std::vector<double> &vVelocities,
 	std::vector<double> &atomsMass,
@@ -85,7 +147,7 @@ void GenerateAtom::generateTwoSymmetricAtoms(
 	atomCharge = insertVector(aC1, aC2);
 }
 
-void GenerateAtom::generateTwoIdenticalSymmetricAtoms(
+void GenerateInitialCoordinates::generateTwoIdenticalSymmetricAtoms(
 	std::vector<double> &xPositions,
 	std::vector<double> &vVelocities,
 	std::vector<double> &atomsMass,
@@ -104,7 +166,7 @@ void GenerateAtom::generateTwoIdenticalSymmetricAtoms(
 }
 
 
-void GenerateAtom::generateTwoAntiSymmetricAtoms(
+void GenerateInitialCoordinates::generateTwoAntiSymmetricAtoms(
 	std::vector<double> &xPositions,
 	std::vector<double> &vVelocities,
 	std::vector<double> &atomsMass,
@@ -127,7 +189,7 @@ void GenerateAtom::generateTwoAntiSymmetricAtoms(
 	atomCharge = insertVector(aC1, aC2);
 }
 
-void GenerateAtom::generateTwoIdenticalAntiSymmetricAtoms(
+void GenerateInitialCoordinates::generateTwoIdenticalAntiSymmetricAtoms(
 	std::vector<double> &xPositions,
 	std::vector<double> &vVelocities,
 	std::vector<double> &atomsMass,
@@ -150,11 +212,13 @@ void GenerateAtom::generateTwoIdenticalAntiSymmetricAtoms(
 }
 
 
-void GenerateAtom::generateBohrMolecule(
+void GenerateInitialCoordinates::generateBohrMolecule(
 	std::vector<double> &xPositions,
 	std::vector<double> &vVelocities,
 	std::vector<double> &atomsMass,
-	std::vector<double> &atomCharge)
+	std::vector<double> &atomCharge,
+	double energy,
+	double angle)
 {
 	vector<double> x1, x2, v1, v2, aM1, aM2, aC1, aC2;
 	// x[0, 2 e 4] eletron
@@ -166,29 +230,15 @@ void GenerateAtom::generateBohrMolecule(
 		v1[i] = 0.0e0;
 	}
 
-	/* De = 4.7 */
-	x1[2] = 0.893217217;
-	x1[5] = 0.5156992;
-	double vElec = 1.083720002;
-	
+	double rProton, rElec, vInit;
+	calcBohrParams(energy, rProton, rElec, vInit);
 
-	/*
-	x1[2] = 0.83217217;
-	x1[5] = 0.7;
-	double vElec = 1.083720002;
-	*/
-
-
-	/* Bohr
-	x1[2] = 0.952627944;
-	x1[5] = 0.55;
-	double vElec = 1.049382877;
-	*/
+	x1[2] = rProton;
+	x1[5] = rElec;
 
 	AuxMath auxMath_;
-	double angle = 5.0e0; // graus
 	double tanAngle = tan(angle * auxMath_._pi / (180.0e0));
-	double vx = sqrt(vElec*vElec / (1 + tanAngle*tanAngle));
+	double vx = sqrt(vInit*vInit / (1 + tanAngle*tanAngle));
 	double vz = vx * tanAngle;
 
 	v1[0] = vx;
@@ -209,14 +259,29 @@ void GenerateAtom::generateBohrMolecule(
 	atomCharge = insertVector(aC1, aC2);
 }
 
+void GenerateInitialCoordinates::calcBohrParams(
+	double energy,
+	double &rProtonInit,
+	double &rElecInit,
+	double &vInit)
+{
+	rProtonInit = (3.0e0 - 9.0e0*sqrt(3.0e0)) / (12.0e0*sqrt(3.0e0)*energy);
 
-double GenerateAtom::randomNumber(double fMin, double fMax)
+	rElecInit = rProtonInit * sqrt(3.0e0);
+
+	vInit = sqrt((9.0e0 - sqrt(3.0e0)) / (12.0e0 * rProtonInit));
+
+}
+
+
+
+double GenerateInitialCoordinates::randomNumber(double fMin, double fMax)
 {
 	double f = ((double)rand() / (double)(RAND_MAX));
 	return fMin + f * (fMax - fMin);
 }
 
-vector<double> GenerateAtom::unitarySphericalVector()
+vector<double> GenerateInitialCoordinates::unitarySphericalVector()
 {
 	vector<double> unit(3);
 	double fi, teta;
@@ -228,7 +293,7 @@ vector<double> GenerateAtom::unitarySphericalVector()
 	return unit;
 }
 
-void GenerateAtom::translateToCenterOfMass(
+void GenerateInitialCoordinates::translateToCenterOfMass(
 	vector<double> &x,
 	vector<double> &atomsMass)
 {
@@ -255,7 +320,7 @@ void GenerateAtom::translateToCenterOfMass(
 	}
 }
 
-void GenerateAtom::velocityCmCorrection(std::vector<double> &v, std::vector<double> &atomsMass)
+void GenerateInitialCoordinates::velocityCmCorrection(std::vector<double> &v, std::vector<double> &atomsMass)
 {
 	double vmx = 0.0e0;
 	double vmy = 0.0e0;
@@ -291,7 +356,7 @@ void GenerateAtom::velocityCmCorrection(std::vector<double> &v, std::vector<doub
 // generate 1 eletron and 1 proton. 
 // x[0, 2 e 4] eletron
 // x[1, 3 e 5] proton
-void GenerateAtom::generateInitialPositionAndVelocity(
+void GenerateInitialCoordinates::generateInitialPositionAndVelocity(
 	vector<double> &xPositions,
 	vector<double> &vVelocities,
 	vector<double> &atomsMass,

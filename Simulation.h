@@ -13,6 +13,8 @@ public:
 	Simulation(DymOptions &dymOptions_in);
 	~Simulation();
 
+	void startSimulation();
+
 	/*
 	void startSimulation(
 		int seed,

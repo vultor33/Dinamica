@@ -1,14 +1,30 @@
-#ifndef GENERATEATOM_H
-#define GENERATEATOM_H
+#ifndef GENERATEINITIALCOORDINATES_H
+#define GENERATEINITIALCOORDINATES_H
 
 #include <vector>
 #include <string>
 
-class GenerateAtom
+#include "DynamicsStructs.h"
+
+class GenerateInitialCoordinates
 {
 public:
-	GenerateAtom(int seed);
-	~GenerateAtom();
+	GenerateInitialCoordinates();
+
+	~GenerateInitialCoordinates();
+
+	void generateInitial(
+		DymOptions &dymOptions_,
+		std::vector<double> &x, 
+		std::vector<double> &v, 
+		std::vector<double> &atomsMass, 
+		std::vector<double> &atomsCharge);
+
+private:
+	double mProton;
+	double pi_;
+
+
 
 	void generateTwoRandomAtoms(
 		std::vector<double> &xPositions,
@@ -44,16 +60,21 @@ public:
 		std::vector<double> &xPositions,
 		std::vector<double> &vVelocities,
 		std::vector<double> &atomsMass,
-		std::vector<double> &atomCharge);
+		std::vector<double> &atomCharge,
+		double dissociationEnergy,
+		double angle
+		);
+
+	void calcBohrParams(
+		double energy,
+		double &rProtonInit,
+		double &rElecInit,
+		double &vInit);
 
 
 	void translateToCenterOfMass(std::vector<double> &x, std::vector<double> &atomsMass);
 
-	// NOT WORKING
-	void velocityCmCorrection(std::vector<double> &v, std::vector<double> &atomsMass);//4 particles SPECIFIC
-private:
-	double mProton;
-	double pi_;
+
 
 	// Le = 1 ; P = 0
 	void generateInitialPositionAndVelocity(
@@ -73,6 +94,10 @@ private:
 	std::vector<double> unitarySphericalVector();
 
 	double randomNumber(double fMin, double fMax);
+
+
+	// NOT WORKING
+	void velocityCmCorrection(std::vector<double> &v, std::vector<double> &atomsMass);//4 particles SPECIFIC
 
 };
 

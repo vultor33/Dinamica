@@ -10,7 +10,7 @@
 #include <cmath>
 #include <stdlib.h>
 
-#include "GenerateAtom.h"
+#include "GenerateInitialCoordinates.h"
 #include "Integrator.h"
 #include "DynamicsStructs.h"
 
@@ -26,61 +26,15 @@ Simulation::Simulation(DymOptions & dymOptions_in)
 
 Simulation::~Simulation(){}
 
-void Simulation::startSimulation(
-	int seed, 
-	double tempKelvin, 
-	double impactFactorAu, 
-	int simulationType
-)
+void Simulation::startSimulation()
 {
-	GenerateAtom genAtom_(dymOptions_.seed);
+	GenerateInitialCoordinates genInitial_;
 	vector<double> x, v, atomsMass, atomsCharge;
-	switch (simulationType)
-	{
-	case 0:
-		genAtom_.generateTwoRandomAtoms(x, v, atomsMass, atomsCharge);
-		break;
-
-	case 1:
-		genAtom_.generateTwoAntiSymmetricAtoms(x, v, atomsMass, atomsCharge);
-		break;
-
-	case 2:
-		genAtom_.generateTwoIdenticalAntiSymmetricAtoms(x, v, atomsMass, atomsCharge);
-		break;
-
-	case 3:
-		genAtom_.generateTwoSymmetricAtoms(x, v, atomsMass, atomsCharge);
-		break;
-
-	case 4:
-		genAtom_.generateTwoIdenticalSymmetricAtoms(x, v, atomsMass, atomsCharge);
-		break;
-
-	case 5:
-		genAtom_.generateTwoAntiSymmetricAtoms(x, v, atomsMass, atomsCharge);
-		dymOptions_.symmetrize = true;
-		break;
-
-	case 6:
-		genAtom_.generateBohrMolecule(x, v, atomsMass, atomsCharge);
-		dymOptions_.symmetrize = true;
-		break;
-
-	default:
-		cout << "simulation type not found" << endl;
-		exit(1);
-		break;
-	}
-	x[0] -= dymOptions_.initialDistance;
-	x[1] -= dymOptions_.initialDistance;
-	x[4] += dymOptions_.impactParameter;
-	x[5] += dymOptions_.impactParameter;
-	v[0] += dymOptions_.initialSpeed;
-	v[1] += dymOptions_.initialSpeed;
-	v[2] -= dymOptions_.initialSpeed;
-	v[3] -= dymOptions_.initialSpeed;
-	genAtom_.translateToCenterOfMass(x, atomsMass);
+	genInitial_.generateInitial(dymOptions_,
+		x,
+		v,
+		atomsMass,
+		atomsCharge);
 
 	Integrator rk_;
 	rk_.setAdditionalParams(atomsMass, atomsCharge);
@@ -94,10 +48,9 @@ void Simulation::startSimulation(
 	if (dymOptions_.printPosVel)
 	{
 		stringstream buildName;
-		buildName << seed << "-"
-			<< tempKelvin << "-"
-			<< impactFactorAu << "-"
-			<< simulationType;
+		buildName << dymOptions_.seed << "-"
+			<< dymOptions_.impactFactorAu << "-"
+			<< dymOptions_.simulationType;
 
 		string posVelName = "simulation-" + buildName.str() + ".csv";
 		posVel_.open(posVelName);

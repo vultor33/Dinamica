@@ -15,7 +15,6 @@ struct DymOptions
 	int iterationLoop;
 	int printLoop;
 	int seed;
-	int integratorOption;//simulationType
 	double maxStopSimulationDistance;
 
 	//print options
@@ -26,10 +25,14 @@ struct DymOptions
 	bool printPosVel;
 
 	//initial conditions options
+	int simulationType;
 	double initialDistance;
 	double impactParameter;
 	double initialSpeed;
-	double tempKelvin, impactFactorAu;
+	double tempKelvin;
+	double impactFactorAu;
+	double energy;
+	double angleBohrModel;
 
 	//paramters optoins
 	double temperatureUnit;
@@ -37,5 +40,6 @@ struct DymOptions
 
 
 };
+
 
 #endif
