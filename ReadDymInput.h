@@ -10,9 +10,15 @@ public:
 
 	~ReadDymInput();
 
-	DymOptions getDymOptions();
+	void defineMethodBohr(double angle);
+
+	void electronPlot();
+
+	void analyzePlot();
 
 	void addIToName(int i);
+
+	DymOptions getDymOptions();
 
 private:
 	DymOptions dymOptions_;

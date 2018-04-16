@@ -14,16 +14,41 @@ ReadDymInput::ReadDymInput()
 
 ReadDymInput::~ReadDymInput(){}
 
-DymOptions ReadDymInput::getDymOptions()
+
+void ReadDymInput::defineMethodBohr(double angle)
 {
-	return dymOptions_;
+	dymOptions_.simulationType = 6;
+	dymOptions_.angleBohrModel = angle;
+}
+
+void ReadDymInput::electronPlot()
+{
+	dymOptions_.plotElectronTraject = true;
+	dymOptions_.timeStep /= 100.0e0;
+}
+
+void ReadDymInput::analyzePlot()
+{
+	dymOptions_.plotAnalyzeGraphs = true;
 }
 
 void ReadDymInput::addIToName(int i)
 {
 	stringstream convert;
-	convert << i;
+	convert
+		<< i
+		<< "-symtype-" << dymOptions_.simulationType;
+	if (dymOptions_.simulationType == 6)
+	{
+		convert << "-angle-" << dymOptions_.angleBohrModel;
+	}
 	dymOptions_.outName = "simulation-" + convert.str() + ".xyz";
+}
+
+
+DymOptions ReadDymInput::getDymOptions()
+{
+	return dymOptions_;
 }
 
 
@@ -52,6 +77,7 @@ void ReadDymInput::generateDefaultOptions()
 	//analyze options
 	dymOptionsDefault.excelResultsName = "simulationResults.csv";
 	dymOptionsDefault.plotAnalyzeGraphs = false;
+	dymOptionsDefault.plotElectronTraject = false;
 
 	//initial conditions options
 	dymOptionsDefault.seed = 3;

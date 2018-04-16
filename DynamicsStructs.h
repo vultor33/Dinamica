@@ -27,6 +27,7 @@ struct DymOptions
 	//analyze options
 	std::string excelResultsName;
 	bool plotAnalyzeGraphs;
+	bool plotElectronTraject;
 
 	//initial conditions options
 	int simulationType;

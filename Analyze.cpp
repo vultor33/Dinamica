@@ -47,8 +47,10 @@ void Analyze::chargeDistribution(DymOptions &dymOptions_)
 	{
 		results_.open((dymOptions_.outName + "electronPlot.csv").c_str());
 		rppGraph_.open((dymOptions_.outName + "rppGraph.csv").c_str());
-		yTraject_.open((dymOptions_.outName + "yTrajectory.csv").c_str());
 	}
+	if(dymOptions_.plotElectronTraject)
+		yTraject_.open((dymOptions_.outName + "yTrajectory.csv").c_str());
+
 
 	vector<int> countHisto(17);
 	for (size_t i = 0; i < countHisto.size(); i++)
@@ -82,7 +84,7 @@ void Analyze::chargeDistribution(DymOptions &dymOptions_)
 
 
 
-		if (dymOptions_.plotAnalyzeGraphs)
+		if (dymOptions_.plotAnalyzeGraphs || dymOptions_.plotElectronTraject)
 		{
 			vector<double> vecPP(3);
 			vecPP[0] = allMol[i][3].x - allMol[i][1].x;
@@ -128,8 +130,12 @@ void Analyze::chargeDistribution(DymOptions &dymOptions_)
 				ppPerpendicular[0], ppPerpendicular[1], ppPerpendicular[2],
 				vecEP1[0], vecEP1[1], vecEP1[2]) / normPerp;
 
-			yTraject_ << ((prodEsc / rpp) - rpp0 / 2.0e0) / rpp << "  " << yProj << endl;
-			rppGraph_ << kRpp << "  " << rpp << endl;
+
+			if(dymOptions_.plotAnalyzeGraphs)
+				rppGraph_ << kRpp << "  " << rpp << endl;
+
+			if(dymOptions_.plotElectronTraject)
+				yTraject_ << ((prodEsc / rpp) - rpp0 / 2.0e0) / rpp << "  " << yProj << endl;
 		}
 
 	}
@@ -153,7 +159,6 @@ void Analyze::chargeDistribution(DymOptions &dymOptions_)
 		results_ << "1.05to1.15 " << countHisto[14] << endl;
 		results_ << "1.15to1.25 " << countHisto[15] << endl;
 		results_ << "1.25+ " << countHisto[16] << endl;
-
 		results_ << endl;
 		rppGraph_.close();
 		results_.close();

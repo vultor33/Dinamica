@@ -12,9 +12,9 @@ int main(int argc, char *argv[])
 	if (argc < 2)
 	{
 		ReadDymInput readDym_;
+		readDym_.defineMethodBohr(5.0e0);
 		readDym_.addIToName(3);
 		DymOptions dymOptions_ = readDym_.getDymOptions();
-		dymOptions_.simulationType = 6;
 
 		if (dymOptions_.simulationType < 6)
 		{
