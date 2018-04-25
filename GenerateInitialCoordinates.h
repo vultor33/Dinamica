@@ -61,16 +61,34 @@ private:
 		std::vector<double> &vVelocities,
 		std::vector<double> &atomsMass,
 		std::vector<double> &atomCharge,
-		double dissociationEnergy,
+		double energy,
 		double angle
 		);
+
+	void generateBohrEllipseMolecule(
+		std::vector<double> &xPositions,
+		std::vector<double> &vVelocities,
+		std::vector<double> &atomsMass,
+		std::vector<double> &atomCharge,
+		double energy,
+		double rElec,
+		double rProton);
+
+	void generateBohrEllipseMoleculeAngle(
+		std::vector<double> &xPositions,
+		std::vector<double> &vVelocities,
+		std::vector<double> &atomsMass,
+		std::vector<double> &atomCharge,
+		double energy,
+		double rElec,
+		double rProton,
+		double angle);
 
 	void calcBohrParams(
 		double energy,
 		double &rProtonInit,
 		double &rElecInit,
 		double &vInit);
-
 
 	void translateToCenterOfMass(std::vector<double> &x, std::vector<double> &atomsMass);
 
@@ -98,6 +116,33 @@ private:
 
 	// NOT WORKING
 	void velocityCmCorrection(std::vector<double> &v, std::vector<double> &atomsMass);//4 particles SPECIFIC
+
+
+
+
+
+
+
+
+
+	void generateElectronsAtCenter(
+		std::vector<double> &xPositions,
+		std::vector<double> &vVelocities,
+		std::vector<double> &atomsMass,
+		std::vector<double> &atomCharge,
+		DymOptions &dymOptions);
+
+
+
+
+
+
+
+
+
+
+
+
 
 };
 

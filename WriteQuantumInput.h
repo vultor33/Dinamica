@@ -55,7 +55,8 @@ vector<string> options(16);
 options[0] = "gamess";
 options[1] = "teste";
 options[2] = " $CONTRL SCFTYP=RHF RUNTYP=OPTIMIZE EXETYP=RUN MPLEVL=2 MAXIT=200 MULT=1";
-options[3] = "   ISPHER=1 COORD=UNIQUE NOSYM=1 UNITS=ANGS $END";
+options[3] = "   ISPHER=1 COORD=UNIQUE NO
+=1 UNITS=ANGS $END";
 options[4] = " $GUESS GUESS=HUCKEL $END";
 options[5] = " $SYSTEM MWORDS=40 MEMDDI=20  $END";
 options[6] = " $SCF DIRSCF=.FALSE. $END";

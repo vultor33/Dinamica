@@ -3,6 +3,7 @@
 #include <fstream>
 #include <vector>
 #include <iostream>
+#include <iomanip>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -26,7 +27,7 @@ Simulation::Simulation(DymOptions & dymOptions_in)
 
 Simulation::~Simulation(){}
 
-void Simulation::startSimulation()
+bool Simulation::startSimulation()
 {
 	GenerateInitialCoordinates genInitial_;
 	vector<double> x, v, atomsMass, atomsCharge;
@@ -70,16 +71,19 @@ void Simulation::startSimulation()
 		if (dymOptions_.checkStopSimulationConditions)
 			checkStopSimulation(x);
 		if (stopSimulation)
-			break;
+		{
+			return true;
+		}
 		if (dymOptions_.printPosVel)
 			printPositionsAndVelocities(x, v, posVel_);
 
 		if (dymOptions_.printMovie)
 		{
-			cout << 100 * i / dymOptions_.printLoop << " %" << endl; ;
+			//cout << 100 * i / dymOptions_.printLoop << " %" << endl; ;
 			printCoulombAtoms(x, dymOptions_.outName, atomsCharge);
 		}
 	}
+	return false;
 
 }
 
@@ -121,9 +125,9 @@ void Simulation::printCoulombAtoms(vector<double> & atoms, string testName, vect
 		else
 			teste_ << "H ";
 
-		teste_ << atoms[i] << "  "
-			<< atoms[i + natm] << "  "
-			<< atoms[i + 2 * natm] << endl;
+		teste_ << fixed << setprecision(8) << atoms[i] << "  "
+			<< fixed << setprecision(8) << atoms[i + natm] << "  "
+			<< fixed << setprecision(8) << atoms[i + 2 * natm] << endl;
 	}
 	teste_.close();
 }
@@ -158,9 +162,5 @@ void Simulation::printPositionsAndVelocities(
 	LzTOTAL =AL2+AI2+AF2+AC2
 
 	L =RAIZ(AN2*AN2+AO2*AO2+AP2*AP2)
-
 	*/
-
-
-
 }

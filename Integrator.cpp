@@ -7,13 +7,14 @@
 #include <fstream>
 
 #include "Fitness.h"
+#include "TrajectorySymmetrizer.h"
 
 using namespace std;
 
 Integrator::Integrator()
 {
 	printEnergy = false;
-	simmetrize = false;
+	symmetrize = 0;
 	integratorType = 0;
 	rksParams.resize(19);
 	rksParams[0] = 0.095176255;
@@ -48,14 +49,14 @@ void Integrator::setAdditionalParams(
 	atomsCharge = atomsCharge_in;
 }
 
-void Integrator::setOptions(bool printEnergy_in, bool simmetrize_in)
+void Integrator::setOptions(bool printEnergy_in, int symmetrize_in)
 {
 	printEnergy = printEnergy_in;
 	if (printEnergy)
 	{
 		printEnergyFile_.open("printEnergyFile.csv");
 	}
-	simmetrize = simmetrize_in;
+	symmetrize = symmetrize_in;
 }
 
 void Integrator::rungeKuttaSimetrico(
@@ -97,8 +98,11 @@ void Integrator::rungeKuttaSimetrico(
 			xInitial[i] += timeStep * rksParams[k+1] * vInitial[i];
 		}
 	}
+	
+	symm_.symmetrize(symmetrize, xInitial, vInitial);
 
-	if (simmetrize)
+	/*
+	if (symmetrize == 1) // inversion center
 	{
 		xInitial[2] = -xInitial[0];
 		xInitial[3] = -xInitial[1];
@@ -113,8 +117,78 @@ void Integrator::rungeKuttaSimetrico(
 		vInitial[10] = -vInitial[8];
 		vInitial[11] = -vInitial[9];
 	}
+	else if (symmetrize == 2) // LH2bl (x=0 ; z->-z; y->y)
+	{
+		xInitial[0] = 0.0e0;
+		xInitial[1] = 0.0e0;
+		xInitial[2] = 0.0e0;
+		xInitial[3] = 0.0e0;
+		xInitial[6] = xInitial[4];
+		xInitial[7] = xInitial[5];
+		xInitial[10] = -xInitial[8];
+		xInitial[11] = -xInitial[9];
 
+		vInitial[0] = 0.0e0;
+		vInitial[1] = 0.0e0;
+		vInitial[2] = 0.0e0;
+		vInitial[3] = 0.0e0;
+
+		vInitial[6] = vInitial[4];
+		vInitial[7] = vInitial[5];
+		vInitial[10] = -vInitial[8];
+		vInitial[11] = -vInitial[9];
+	}
+	else if (symmetrize == 3) // f-langmuirCenter
+	{
+		xInitial[2] = xInitial[0];
+		xInitial[6] = -xInitial[4];
+		xInitial[8] = 0.0e0;
+		xInitial[10] = 0.0e0;
+
+		vInitial[2] = vInitial[0];
+		vInitial[6] = -vInitial[4];
+		vInitial[8] = 0.0e0;
+		vInitial[10] = 0.0e0;
+
+		xInitial[3] = xInitial[1];
+		xInitial[5] = 0.0e0;
+		xInitial[7] = 0.0e0;
+		xInitial[11] = -xInitial[9];
+
+		vInitial[3] = vInitial[1];
+		vInitial[5] = 0.0e0;
+		vInitial[7] = 0.0e0;
+		vInitial[11] = -vInitial[9];
+	}
+	else if (symmetrize == 4) // g-langmuirCenter
+	{
+		xInitial[0] = 0.0e0;
+		xInitial[2] = 0.0e0;
+		xInitial[6] = -xInitial[4];
+		xInitial[10] = xInitial[8];
+
+		vInitial[0] = 0.0e0;
+		vInitial[2] = 0.0e0;
+		vInitial[6] = -vInitial[4];
+		vInitial[10] = vInitial[8];
+
+		xInitial[1] = 0.0e0;
+		xInitial[3] = 0.0e0;
+		xInitial[5] = 0.0e0;
+		xInitial[7] = 0.0e0;
+
+		vInitial[1] = 0.0e0;
+		vInitial[3] = 0.0e0;
+		vInitial[5] = 0.0e0;
+		vInitial[7] = 0.0e0;
+	}
+
+	*/
 }
+
+
+
+
 
 
 

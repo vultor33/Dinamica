@@ -6,6 +6,7 @@
 
 #include "DynamicsStructs.h"
 #include "AuxMath.h"
+#include "TrajectorySymmetrizer.h"
 
 using namespace std;
 
@@ -13,7 +14,6 @@ GenerateInitialCoordinates::GenerateInitialCoordinates()
 {
 	mProton = 1836.15273443449e0;
 	pi_ = 3.1415926535897932384626433832795e0;
-	
 }
 
 GenerateInitialCoordinates::~GenerateInitialCoordinates(){}
@@ -25,7 +25,6 @@ void GenerateInitialCoordinates::generateInitial(
 	std::vector<double> &atomsMass,
 	std::vector<double> &atomsCharge)
 {
-
 	switch (dymOptions_.simulationType)
 	{
 	case 0:
@@ -50,15 +49,54 @@ void GenerateInitialCoordinates::generateInitial(
 
 	case 5:
 		generateTwoAntiSymmetricAtoms(x, v, atomsMass, atomsCharge);
-		dymOptions_.symmetrize = true;
+		dymOptions_.symmetrize = 1;
 		break;
 
 	case 6:
-		generateBohrMolecule(x, v, atomsMass, atomsCharge, dymOptions_.energy, dymOptions_.angleBohrModel);
-		dymOptions_.symmetrize = true;
-		dymOptions_.initialDistance = 0.0e0;
-		dymOptions_.impactParameter = 0.0e0;
-		dymOptions_.initialSpeed = 0.0e0;
+		generateBohrMolecule(x, v, atomsMass, atomsCharge, dymOptions_.energy, dymOptions_.angle);
+		break;
+
+	case 7:
+		generateBohrEllipseMolecule(
+			x, 
+			v, 
+			atomsMass, 
+			atomsCharge, 
+			dymOptions_.energy, 
+			dymOptions_.rElec,
+			dymOptions_.rProton);
+		break;
+
+	case 8:
+		generateBohrEllipseMoleculeAngle(
+			x,
+			v,
+			atomsMass,
+			atomsCharge,
+			dymOptions_.energy,
+			dymOptions_.rElec,
+			dymOptions_.rProton,
+			dymOptions_.angle);
+		break;
+	case 9:
+		generateBohrEllipseMoleculeAngle(
+			x,
+			v,
+			atomsMass,
+			atomsCharge,
+			dymOptions_.energy,
+			dymOptions_.rElec,
+			dymOptions_.rProton,
+			180.0e0);
+		break;
+
+	case 10:
+		generateElectronsAtCenter(
+			x,
+			v,
+			atomsMass,
+			atomsCharge,
+			dymOptions_);
 		break;
 
 	default:
@@ -237,9 +275,18 @@ void GenerateInitialCoordinates::generateBohrMolecule(
 	x1[5] = rProton;
 
 	AuxMath auxMath_;
-	double tanAngle = tan(angle * auxMath_._pi / (180.0e0));
-	double vx = sqrt(vInit*vInit / (1 + tanAngle*tanAngle));
-	double vz = vx * tanAngle;
+	double vx, vz;
+	if (abs(angle - 90) < 0.00001)
+	{
+		vx = 0.0e0;
+		vz = vInit;
+	}
+	else
+	{
+		double tanAngle = tan(angle * auxMath_._pi / (180.0e0));
+		vx = sqrt(vInit*vInit / (1 + tanAngle * tanAngle));
+		vz = vx * tanAngle;
+	}
 
 	v1[0] = vx;
 	v1[4] = vz;
@@ -271,6 +318,126 @@ void GenerateInitialCoordinates::calcBohrParams(
 
 	vInit = sqrt((9.0e0 - sqrt(3.0e0)) / (12.0e0 * rProtonInit));
 
+}
+
+
+void GenerateInitialCoordinates::generateBohrEllipseMoleculeAngle(
+	std::vector<double> &xPositions,
+	std::vector<double> &vVelocities,
+	std::vector<double> &atomsMass,
+	std::vector<double> &atomCharge,
+	double energy,
+	double rElec,
+	double rProton,
+	double angle)
+{
+	vector<double> x1, x2, v1, v2, aM1, aM2, aC1, aC2;
+	// x[0, 2 e 4] eletron
+	// x[1, 3 e 5] proton
+	generateInitialPositionAndVelocity(x1, v1, aM1, aC1);
+	for (size_t i = 0; i < x1.size(); i++)
+	{
+		x1[i] = 0.0e0;
+		v1[i] = 0.0e0;
+	}
+
+	x1[4] = rElec;
+	x1[5] = rProton;
+
+	double vPotential = (1.0e0 / (2.0e0*rProton)) 
+		+ (1.0e0 / (2.0e0*rElec)) 
+		- (2.0e0 / (rElec - rProton)) 
+		- (2.0e0 / (rElec + rProton));
+
+	if ((energy - vPotential) < 0.0e0)
+		v1[2] = 10000.0e0;
+	else
+		v1[2] = sqrt(energy - vPotential);
+
+	x2 = x1;
+	v2 = v1;
+	aM2 = aM1;
+	aC2 = aC1;
+	for (size_t i = 0; i < x1.size(); i++)
+	{
+		x2[i] *= -1.0e0;
+		v2[i] *= -1.0e0;
+	}
+
+	double vMod = v2[2];
+	AuxMath auxMath_;
+	double vx, vy;
+	if ((abs(angle - 90) < 0.00001))
+	{
+		vy = 0.0e0;
+		vx = vMod;
+	}
+	else if (abs(angle - 90) < 0.00001)
+	{
+		vy = 0.0e0;
+		vx = -vMod;
+	}
+	else
+	{
+		double tanAngle = tan(angle * auxMath_._pi / (180.0e0));
+		vy = sqrt(vMod*vMod / (1 + tanAngle * tanAngle));
+		vx = vy * tanAngle;
+	}
+	v2[2] = vy;
+	v2[0] = vx;
+
+
+	xPositions = addAtom(x1, x2);
+	vVelocities = addAtom(v1, v2);
+	atomsMass = addAtom(aM1, aM2);
+	atomCharge = insertVector(aC1, aC2);
+}
+
+void GenerateInitialCoordinates::generateBohrEllipseMolecule(
+	std::vector<double> &xPositions,
+	std::vector<double> &vVelocities,
+	std::vector<double> &atomsMass,
+	std::vector<double> &atomCharge,
+	double energy,
+	double rElec,
+	double rProton)
+{
+	vector<double> x1, x2, v1, v2, aM1, aM2, aC1, aC2;
+	// x[0, 2 e 4] eletron
+	// x[1, 3 e 5] proton
+	generateInitialPositionAndVelocity(x1, v1, aM1, aC1);
+	for (size_t i = 0; i < x1.size(); i++)
+	{
+		x1[i] = 0.0e0;
+		v1[i] = 0.0e0;
+	}
+
+	x1[4] = rElec;
+	x1[5] = rProton;
+
+	double vPotential = (1.0e0 / (2.0e0*rProton))
+		+ (1.0e0 / (2.0e0*rElec))
+		- (2.0e0 / (rElec - rProton))
+		- (2.0e0 / (rElec + rProton));
+
+	if ((energy - vPotential) < 0.0e0)
+		v1[2] = 10000.0e0;
+	else
+		v1[2] = sqrt(energy - vPotential);
+
+	x2 = x1;
+	v2 = v1;
+	aM2 = aM1;
+	aC2 = aC1;
+	for (size_t i = 0; i < x1.size(); i++)
+	{
+		x2[i] *= -1.0e0;
+		v2[i] *= -1.0e0;
+	}
+	xPositions = addAtom(x1, x2);
+	vVelocities = addAtom(v1, v2);
+	atomsMass = addAtom(aM1, aM2);
+	atomCharge = insertVector(aC1, aC2);
 }
 
 
@@ -408,4 +575,135 @@ void GenerateInitialCoordinates::generateInitialPositionAndVelocity(
 
 	translateToCenterOfMass(xPositions, atomsMass);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// DEFINICAO DO NOVO CONJUNTO DE TRAJETORIAS
+void GenerateInitialCoordinates::generateElectronsAtCenter(
+	std::vector<double> &xPositions,
+	std::vector<double> &vVelocities,
+	std::vector<double> &atomsMass,
+	std::vector<double> &atomCharge,
+	DymOptions &dymOptions_)
+{
+	vector<double> x1, x2, v1, v2, aM1, aM2, aC1, aC2;
+	generateInitialPositionAndVelocity(x1, v1, aM1, aC1);
+	for (size_t i = 0; i < x1.size(); i++)
+	{
+		x1[i] = 0.0e0;
+		v1[i] = 0.0e0;
+	}
+
+	double energy = dymOptions_.energy;
+	double rElec = dymOptions_.rElec;
+	double rProton = dymOptions_.rProton;
+	double angle = dymOptions_.angle;
+
+	double vPotential;
+	if (dymOptions_.initialPositionType == 0)
+	{
+		vPotential = (1.0e0 / (2.0e0*rProton))
+			+ (1.0e0 / (2.0e0*rElec))
+			- (4.0e0 / sqrt(rElec*rElec + rProton * rProton));
+	}
+	else if (dymOptions_.initialPositionType == 1)
+	{
+		vPotential = (1.0e0 / (2.0e0*rProton))
+			+ (1.0e0 / (2.0e0*rElec))
+			- (2.0e0 / (rElec - rProton))
+			- (2.0e0 / (rElec + rProton));
+	}
+
+	double vInitial;
+	if ((energy - vPotential) < 0.0e0)
+		vInitial = 10000.0e0;
+	else
+		vInitial = sqrt(energy - vPotential);
+
+	if (dymOptions_.initialPositionType == 0)
+	{
+		x1[2] = rElec; //ye
+		x1[5] = rProton; //zp
+	}
+	else if (dymOptions_.initialPositionType == 1)
+	{
+		x1[4] = rElec; //ze
+		x1[5] = rProton; //zp
+	}
+
+	AuxMath auxMath_;
+	double auxV1, auxV2;
+	if (abs(angle - 90) < 0.00001)
+	{
+		auxV1 = 0.0e0;
+		auxV2 = vInitial;
+	}
+	else
+	{
+		double tanAngle = tan(angle * auxMath_._pi / (180.0e0));
+		auxV1 = sqrt(vInitial*vInitial / (1 + tanAngle * tanAngle));
+		auxV2 = auxV1 * tanAngle;
+	}
+
+	if (dymOptions_.initialPositionType == 0)
+	{
+		v1[0] = auxV1; //vye
+		v1[4] = auxV2; //vze
+	}
+	else if (dymOptions_.initialPositionType == 1)
+	{
+		v1[2] = auxV1; //vye
+		v1[0] = auxV2; //vxe
+	}
+
+	x2 = x1;
+	v2 = v1;
+	aM2 = aM1;
+	aC2 = aC1;
+
+	xPositions = addAtom(x1, x2);
+	vVelocities = addAtom(v1, v2);
+
+	if (dymOptions_.initialPositionType == 0)
+	{
+		xPositions[6] = -xPositions[2];
+		xPositions[11] = -xPositions[9];
+	}
+	else if (dymOptions_.initialPositionType == 1)
+	{
+		xPositions[10] = -xPositions[8];
+		xPositions[11] = -xPositions[9];
+	}
+
+	TrajectorySymmetrizer symm_;
+	symm_.symmetrize(dymOptions_.symmetrize, xPositions, vVelocities);
+
+	atomsMass = addAtom(aM1, aM2);
+	atomCharge = insertVector(aC1, aC2);
+}
+
+
 

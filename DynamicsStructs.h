@@ -16,11 +16,11 @@ struct DymOptions
 	int printLoop;
 	int seed;
 	double maxStopSimulationDistance;
+	int symmetrize;
 
 	//print options
 	bool checkStopSimulationConditions;
 	bool printEnergy;
-	bool symmetrize;
 	bool printMovie;
 	bool printPosVel;
 
@@ -37,7 +37,11 @@ struct DymOptions
 	double tempKelvin;
 	double impactFactorAu;
 	double energy;
-	double angleBohrModel;
+	double rElec;
+	double rProton;
+	double angle;
+	int initialPositionType; // 0 center ; 1 rear
+
 
 	//paramters optoins
 	double temperatureUnit;

@@ -163,13 +163,16 @@ void Analyze::chargeDistribution(DymOptions &dymOptions_)
 		rppGraph_.close();
 		results_.close();
 	}
-
-	cout << endl << endl;
 	double amplMeanValue = 0.0e0;
 	for (size_t i = 1; i < amplMax.size(); i++)
 		amplMeanValue += (amplMax[i] - amplMax[i - 1]);
 
-	amplMeanValue /= (double)(amplMax.size() - 1);
+	if (amplMax.size() == 1)
+		amplMeanValue = amplMax[0];
+	else if (amplMax.size() > 1)
+		amplMeanValue /= (double)(amplMax.size() - 1);
+	else
+		amplMeanValue = 300.0e0;
 
 	ofstream excelResult_;
 	excelResult_.open(dymOptions_.excelResultsName.c_str(), std::ofstream::out | std::ofstream::app);

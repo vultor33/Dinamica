@@ -1,9 +1,8 @@
-#include <time.h>
-
 #include "DynamicsStructs.h"
 #include "ReadDymInput.h"
 #include "Simulation.h"
 #include "Analyze.h"
+#include "CalculateScreening.h"
 
 using namespace std;
 
@@ -11,22 +10,13 @@ int main(int argc, char *argv[])
 {
 	if (argc < 2)
 	{
-		ReadDymInput readDym_;
-		readDym_.defineMethodBohr(5.0e0);
-		readDym_.addIToName(3);
-		DymOptions dymOptions_ = readDym_.getDymOptions();
+		CalculateScreening calScreen_;
 
-		if (dymOptions_.simulationType < 6)
-		{
-			dymOptions_.seed = (int)time(NULL);
-			srand(dymOptions_.seed);
-		}
+		//zeros removidos, fazer eles depois sozinhos com tratamento especial.
 
-		Simulation sim(dymOptions_);
-		sim.startSimulation();
+		//calScreen_.screenDynamicCenter(4,0);
+		calScreen_.screenDynamicRear(2, 1);
 
-		Analyze an_;
-		an_.chargeDistribution(dymOptions_);
 	}
 	return 0;
 }
@@ -36,10 +26,6 @@ int main(int argc, char *argv[])
 gnuplot
 cd "C:\\Users\\frederico\\source\\repos\\Dinamica\\Dinamica"
 */
-
-
-
-
 
 
 /*

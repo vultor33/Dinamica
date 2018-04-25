@@ -13,7 +13,7 @@ public:
 	Simulation(DymOptions &dymOptions_in);
 	~Simulation();
 
-	void startSimulation();
+	bool startSimulation();
 
 	/*
 	void startSimulation(

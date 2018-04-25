@@ -2,6 +2,7 @@
 
 #include <string>
 #include <sstream>
+#include <time.h>
 
 #include "DynamicsStructs.h"
 
@@ -15,11 +16,72 @@ ReadDymInput::ReadDymInput()
 ReadDymInput::~ReadDymInput(){}
 
 
+void ReadDymInput::defineMethodSymmetries(
+	int symm,
+	int initialPositionType,
+	double rElec,
+	double rProton,
+	double angle)
+{
+	dymOptions_.simulationType = 10;
+	dymOptions_.symmetrize = symm;
+	dymOptions_.initialPositionType = initialPositionType;
+	dymOptions_.initialDistance = 0.0e0;
+	dymOptions_.impactParameter = 0.0e0;
+	dymOptions_.initialSpeed = 0.0e0;
+	dymOptions_.rElec = rElec;
+	dymOptions_.rProton = rProton;
+	dymOptions_.angle = angle;
+}
+
+
+/*
 void ReadDymInput::defineMethodBohr(double angle)
 {
 	dymOptions_.simulationType = 6;
+	dymOptions_.symmetrize = 1;
+	dymOptions_.initialDistance = 0.0e0;
+	dymOptions_.impactParameter = 0.0e0;
+	dymOptions_.initialSpeed = 0.0e0;
 	dymOptions_.angleBohrModel = angle;
 }
+
+void ReadDymInput::defineMethodEllipseBohr(double rElec, double rProton)
+{
+	dymOptions_.simulationType = 7;
+	dymOptions_.symmetrize = 1;
+	dymOptions_.initialDistance = 0.0e0;
+	dymOptions_.impactParameter = 0.0e0;
+	dymOptions_.initialSpeed = 0.0e0;
+	dymOptions_.rElecEllipse = rElec;
+	dymOptions_.rProtonEllipse = rProton;
+}
+
+void ReadDymInput::defineMethodEllipseBohrAngle(double rElec, double rProton, double angle)
+{
+	dymOptions_.simulationType = 8;
+	dymOptions_.symmetrize = 0;
+	dymOptions_.initialDistance = 0.0e0;
+	dymOptions_.impactParameter = 0.0e0;
+	dymOptions_.initialSpeed = 0.0e0;
+	dymOptions_.rElecEllipse = rElec;
+	dymOptions_.rProtonEllipse = rProton;
+	dymOptions_.angleEllipse = angle;
+}
+
+void ReadDymInput::defineMethodLh2b(double rElec, double rProton)
+{
+	dymOptions_.simulationType = 9;
+	dymOptions_.symmetrize = 2;
+	dymOptions_.initialDistance = 0.0e0;
+	dymOptions_.impactParameter = 0.0e0;
+	dymOptions_.initialSpeed = 0.0e0;
+	dymOptions_.rElecEllipse = rElec;
+	dymOptions_.rProtonEllipse = rProton;
+}
+
+*/
+
 
 void ReadDymInput::electronPlot()
 {
@@ -30,6 +92,16 @@ void ReadDymInput::electronPlot()
 void ReadDymInput::analyzePlot()
 {
 	dymOptions_.plotAnalyzeGraphs = true;
+	dymOptions_.printPosVel = true;
+	dymOptions_.printEnergy = true;
+}
+
+void ReadDymInput::setSeed(int seed)
+{
+	if (seed == -1)
+		dymOptions_.seed = (int)time(NULL);
+	else
+		dymOptions_.seed = seed;
 }
 
 void ReadDymInput::addIToName(int i)
@@ -37,11 +109,12 @@ void ReadDymInput::addIToName(int i)
 	stringstream convert;
 	convert
 		<< i
-		<< "-symtype-" << dymOptions_.simulationType;
-	if (dymOptions_.simulationType == 6)
-	{
-		convert << "-angle-" << dymOptions_.angleBohrModel;
-	}
+		<< "-simtype-" << dymOptions_.simulationType
+		<< "-initialtype-" << dymOptions_.initialPositionType
+		<< "-symmetrizeType-" << dymOptions_.symmetrize
+		<< "-rElec-" << dymOptions_.rElec
+		<< "-rProton-" << dymOptions_.rProton
+		<< "-angle-" << dymOptions_.angle;
 	dymOptions_.outName = "simulation-" + convert.str() + ".xyz";
 }
 
@@ -58,16 +131,16 @@ void ReadDymInput::generateDefaultOptions()
 
 	dymOptionsDefault.outName = "simulation.xyz";
 
-	dymOptionsDefault.iterationLoop = 1000;
+	dymOptionsDefault.iterationLoop = 10000;
 	dymOptionsDefault.printLoop = 300;
-	dymOptionsDefault.timeStep = 0.01e0;
+	dymOptionsDefault.timeStep = 0.001e0;
 
-	//stop when particcles is too far
+	//stop when particcles are too far
 	dymOptionsDefault.checkStopSimulationConditions = true;
 	dymOptionsDefault.maxStopSimulationDistance = 100.0e0;
 
 	//activate symmetrization
-	dymOptionsDefault.symmetrize = false;
+	dymOptionsDefault.symmetrize = 0;
 
 	//print options
 	dymOptionsDefault.printEnergy = false;
@@ -86,7 +159,9 @@ void ReadDymInput::generateDefaultOptions()
 	dymOptionsDefault.impactParameter = 0.5e0;
 	dymOptionsDefault.initialSpeed = initialVelocityKinecticTheory(300.0e0);
 	dymOptionsDefault.energy = -1.17444904341371e0;
-	dymOptionsDefault.angleBohrModel = 20.0e0;
+	dymOptionsDefault.rElec = 1.0e0;
+	dymOptionsDefault.rProton = 0.5e0;
+	dymOptionsDefault.angle = 30.0e0;
 
 	dymOptions_ = dymOptionsDefault;
 
