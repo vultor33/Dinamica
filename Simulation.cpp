@@ -27,15 +27,18 @@ Simulation::Simulation(DymOptions & dymOptions_in)
 
 Simulation::~Simulation(){}
 
-bool Simulation::startSimulation()
+int Simulation::startSimulation()
 {
 	GenerateInitialCoordinates genInitial_;
 	vector<double> x, v, atomsMass, atomsCharge;
-	genInitial_.generateInitial(dymOptions_,
+	bool sucess = genInitial_.generateInitial(dymOptions_,
 		x,
 		v,
 		atomsMass,
 		atomsCharge);
+
+	if (!sucess)
+		return 1;
 
 	Integrator rk_;
 	rk_.setAdditionalParams(atomsMass, atomsCharge);
@@ -72,18 +75,17 @@ bool Simulation::startSimulation()
 			checkStopSimulation(x);
 		if (stopSimulation)
 		{
-			return true;
+			return 2;
 		}
 		if (dymOptions_.printPosVel)
 			printPositionsAndVelocities(x, v, posVel_);
 
 		if (dymOptions_.printMovie)
 		{
-			//cout << 100 * i / dymOptions_.printLoop << " %" << endl; ;
 			printCoulombAtoms(x, dymOptions_.outName, atomsCharge);
 		}
 	}
-	return false;
+	return 0;
 
 }
 

@@ -174,11 +174,18 @@ void Analyze::chargeDistribution(DymOptions &dymOptions_)
 	else
 		amplMeanValue = 300.0e0;
 
+	string productName;
+	int productCode;
+	analyzeProducts(allMol, productCode, productName);
+
 	ofstream excelResult_;
 	excelResult_.open(dymOptions_.excelResultsName.c_str(), std::ofstream::out | std::ofstream::app);
-	excelResult_ << dymOptions_.outName << ";" << rppMean / allMol.size() << ";" << amplMeanValue << endl;
+	excelResult_ << dymOptions_.outName << ";" 
+		<< rppMean / allMol.size() << ";" 
+		<< amplMeanValue << ";"  
+		<< productCode << ";"
+		<< productName << ";" << endl;
 	excelResult_.close();
-	
 }
 
 vector< vector<CoordXYZ> > Analyze::readSimulationInput(string fileName)
@@ -375,3 +382,123 @@ void Analyze::printCoulombAtoms(vector<double> & atoms, string testName, vector<
 
 
 
+void Analyze::analyzeProducts(
+	std::vector< std::vector<CoordXYZ> > &allMol, 
+	int &productCode, 
+	std::string &productName)
+{
+	int i = allMol.size() - 1;
+	vector<double> vecPP(3);
+	vecPP[0] = allMol[i][3].x - allMol[i][1].x;
+	vecPP[1] = allMol[i][3].y - allMol[i][1].y;
+	vecPP[2] = allMol[i][3].z - allMol[i][1].z;
+	vector<double> vecE1P1(3);
+	vecE1P1[0] = allMol[i][0].x - allMol[i][1].x;
+	vecE1P1[1] = allMol[i][0].y - allMol[i][1].y;
+	vecE1P1[2] = allMol[i][0].z - allMol[i][1].z;
+	vector<double> vecE2P1(3);
+	vecE2P1[0] = allMol[i][2].x - allMol[i][1].x;
+	vecE2P1[1] = allMol[i][2].y - allMol[i][1].y;
+	vecE2P1[2] = allMol[i][2].z - allMol[i][1].z;
+	vector<double> vecE1P2(3);
+	vecE1P2[0] = allMol[i][0].x - allMol[i][3].x;
+	vecE1P2[1] = allMol[i][0].y - allMol[i][3].y;
+	vecE1P2[2] = allMol[i][0].z - allMol[i][3].z;
+	vector<double> vecE2P2(3);
+	vecE2P2[0] = allMol[i][2].x - allMol[i][3].x;
+	vecE2P2[1] = allMol[i][2].y - allMol[i][3].y;
+	vecE2P2[2] = allMol[i][2].z - allMol[i][3].z;
+
+	AuxMath auxMath_;
+	double rpp = auxMath_.norm(vecPP[0], vecPP[1], vecPP[2]);
+	double re1p1 = auxMath_.norm(vecE1P1[0], vecE1P1[1], vecE1P1[2]);
+	double re2p1 = auxMath_.norm(vecE2P1[0], vecE2P1[1], vecE2P1[2]);
+	double re1p2 = auxMath_.norm(vecE1P2[0], vecE1P2[1], vecE1P2[2]);
+	double re2p2 = auxMath_.norm(vecE2P2[0], vecE2P2[1], vecE2P2[2]);
+
+	double bondLimit = 2.834589187e0;
+	double nearLimit = 5.669178375;
+
+	if (allMol.size() < 300)
+	{
+		productCode = 2;
+		productName = "2Hp + 2e";
+	}
+	else if (rpp < bondLimit)
+	{
+		if ((re1p1 < nearLimit) &&
+			(re1p2 < nearLimit) &&
+			(re2p1 < nearLimit) &&
+			(re2p2 < nearLimit)
+			)
+		{
+			productCode = 0;
+			productName = "H2";
+		}
+		else if (
+			((re1p1 < nearLimit) &&
+			(re1p2 < nearLimit))
+			||
+			((re2p1 < nearLimit) &&
+			(re2p2 < nearLimit))
+			)
+		{
+			productCode = 1;
+			productName = "H2p + e";
+		}
+		else
+		{
+			productCode = 2;
+			productName = "2Hp + 2e";
+		}
+	}
+	else
+	{
+		if ((re1p1 < bondLimit) &&
+			(re1p2 < bondLimit) &&
+			(re2p1 < bondLimit) &&
+			(re2p2 < bondLimit))
+		{
+			productCode = 0;
+			productName = "H2";
+		}
+		else if (
+			((re1p1 < bondLimit) &&
+			(re2p1 < bondLimit))
+			||
+			((re1p2 < bondLimit) &&
+			(re2p2 < bondLimit))
+			)
+		{
+			productCode = 4;
+			productName = "Hm + Hp";
+		}
+		else if (
+			((re1p1 < bondLimit) ||
+			(re2p1 < bondLimit))
+			&&
+			((re1p2 < bondLimit) ||
+			(re2p2 < bondLimit))
+			)
+		{
+			productCode = 3;
+			productName = "2H";
+		}
+		else if (
+			((re1p1 < bondLimit) ||
+			(re2p1 < bondLimit))
+			||
+			((re1p2 < bondLimit) ||
+			(re2p2 < bondLimit))
+			)
+		{
+			productCode = 5;
+			productName = "H + Hp + e";
+		}
+		else
+		{
+			productCode = 2;
+			productName = "2Hp + 2e";
+		}
+	}
+}

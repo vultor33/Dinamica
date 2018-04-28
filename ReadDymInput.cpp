@@ -137,7 +137,7 @@ void ReadDymInput::generateDefaultOptions()
 
 	//stop when particcles are too far
 	dymOptionsDefault.checkStopSimulationConditions = true;
-	dymOptionsDefault.maxStopSimulationDistance = 100.0e0;
+	dymOptionsDefault.maxStopSimulationDistance = 1.0e6;
 
 	//activate symmetrization
 	dymOptionsDefault.symmetrize = 0;

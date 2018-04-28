@@ -14,8 +14,15 @@ int main(int argc, char *argv[])
 
 		//zeros removidos, fazer eles depois sozinhos com tratamento especial.
 
-		//calScreen_.screenDynamicCenter(4,0);
-		calScreen_.screenDynamicRear(2, 1);
+		calScreen_.analyzeAll();
+
+		//calScreen_.screenDynamicCenter(1, 0);
+
+		//calScreen_.screenDynamicRear(2, 1);
+
+		//calScreen_.screenDynamicCenterPure(4, 0, 15.0e0);
+
+		//calScreen_.screenDynamicRearPure(2, 1, 15.0e0);
 
 	}
 	return 0;

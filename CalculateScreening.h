@@ -8,18 +8,17 @@ public:
 
 	~CalculateScreening();
 
-	/*
-	void calcBohr();
-	void calcBohrEllipse();
-	void calcBohrEllipseAngle();
-	void calcEllipseLh2b();
-	*/
-
 	void screenDynamicCenter(int symmetricType, int initialPositions, int kOnly = -1);
+
+	void screenDynamicCenterPure(int symmetricType, int initialPositions, double iAngle, int kOnly = -1);
 
 	void screenDynamicRear(int symmetricType, int initialPositions, int kOnly = -1);
 
+	void screenDynamicRearPure(int symmetricType, int initialPositions, double iAngle, int kOnly = -1);
+
 	void calcOne();
+
+	void analyzeAll();
 
 
 

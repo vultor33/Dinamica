@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <string>
 
 #include "DynamicsStructs.h"
 #include "ReadDymInput.h"
@@ -18,8 +19,8 @@ CalculateScreening::~CalculateScreening(){}
 void CalculateScreening::screenDynamicCenter(int symmetricType, int initialPositions, int kOnly)
 {
 	
-	int k = 0;
-	for (int iEle = -6; iEle <= 15; iEle++)
+	int k = 1;
+	for (int iEle = -6; iEle <= 8; iEle++)
 	{
 		for (int iPro = -3; iPro <= 15; iPro++)
 		{
@@ -42,13 +43,10 @@ void CalculateScreening::screenDynamicCenter(int symmetricType, int initialPosit
 				srand(dymOptions_.seed);
 
 				Simulation sim(dymOptions_);
-				bool forcedStop = sim.startSimulation();
-				if (forcedStop)
+				int stopStatus = sim.startSimulation();
+				if (stopStatus == 1)
 				{
-					ofstream excelResult_;
-					excelResult_.open(dymOptions_.excelResultsName.c_str(), std::ofstream::out | std::ofstream::app);
-					excelResult_ << dymOptions_.outName << ";failed" << endl;
-					excelResult_.close();
+					k--;
 				}
 				else
 				{
@@ -66,8 +64,8 @@ void CalculateScreening::screenDynamicCenter(int symmetricType, int initialPosit
 void CalculateScreening::screenDynamicRear(int symmetricType, int initialPositions, int kOnly)
 {
 
-	int k = 0;
-	for (int iEle = -6; iEle <= 15; iEle++)
+	int k = 1;
+	for (int iEle = -6; iEle <= 9; iEle++)
 	{
 		for (int iPro = -3; iPro <= 15; iPro++)
 		{
@@ -90,13 +88,10 @@ void CalculateScreening::screenDynamicRear(int symmetricType, int initialPositio
 				srand(dymOptions_.seed);
 
 				Simulation sim(dymOptions_);
-				bool forcedStop = sim.startSimulation();
-				if (forcedStop)
+				int stopStatus = sim.startSimulation();
+				if (stopStatus == 1)
 				{
-					ofstream excelResult_;
-					excelResult_.open(dymOptions_.excelResultsName.c_str(), std::ofstream::out | std::ofstream::app);
-					excelResult_ << dymOptions_.outName << ";failed" << endl;
-					excelResult_.close();
+					k--;
 				}
 				else
 				{
@@ -109,6 +104,91 @@ void CalculateScreening::screenDynamicRear(int symmetricType, int initialPositio
 	}
 
 }
+
+
+void CalculateScreening::screenDynamicCenterPure(int symmetricType, int initialPositions, double iAngle, int kOnly)
+{
+	int k = 1;
+	for (int iEle = -6; iEle <= 8; iEle++)
+	{
+		for (int iPro = -3; iPro <= 15; iPro++)
+		{
+			if ((kOnly != -1) && (kOnly != k))
+			{
+				k++;
+				continue;
+			}
+
+			double rProton = (double)iPro * 0.1e0 + 0.5156992;
+			double rEle = (double)iEle * 0.1e0 + 0.893217217;
+
+			ReadDymInput readDym_;
+			readDym_.defineMethodSymmetries(symmetricType, initialPositions, rEle, rProton, iAngle);
+			readDym_.addIToName(k);
+			k++;
+			DymOptions dymOptions_ = readDym_.getDymOptions();
+			srand(dymOptions_.seed);
+
+			Simulation sim(dymOptions_);
+			int stopStatus = sim.startSimulation();
+			if (stopStatus == 1)
+			{
+				k--;
+			}
+			else
+			{
+				Analyze an_;
+				an_.chargeDistribution(dymOptions_);
+			}
+		}
+	}
+
+}
+
+
+
+
+
+void CalculateScreening::screenDynamicRearPure(int symmetricType, int initialPositions, double iAngle, int kOnly)
+{
+	int k = 1;
+	for (int iEle = -6; iEle <= 9; iEle++)
+	{
+		for (int iPro = -3; iPro <= 15; iPro++)
+		{
+			if ((kOnly != -1) && (kOnly != k))
+			{
+				k++;
+				continue;
+			}
+
+			double rProton = (double)iPro * 0.1e0 + 0.5156992e0;
+			double rEle = (double)iEle * 0.1e0 + rProton + 0.7e0;
+
+			ReadDymInput readDym_;
+			readDym_.defineMethodSymmetries(symmetricType, initialPositions, rEle, rProton, iAngle);
+			readDym_.addIToName(k);
+			k++;
+			DymOptions dymOptions_ = readDym_.getDymOptions();
+			srand(dymOptions_.seed);
+
+			Simulation sim(dymOptions_);
+			int stopStatus = sim.startSimulation();
+			if (stopStatus == 1)
+			{
+				k--;
+			}
+			else
+			{
+				Analyze an_;
+				an_.chargeDistribution(dymOptions_);
+			}
+		}
+	}
+
+}
+
+
 
 
 void  CalculateScreening::calcOne()
@@ -144,6 +224,26 @@ void  CalculateScreening::calcOne()
 		an_.chargeDistribution(dymOptions_);
 	}
 }
+
+void CalculateScreening::analyzeAll()
+{
+	ifstream files_("allFiles.txt");
+
+	string line;
+	while (getline(files_, line))
+	{
+		if (line == "")
+			break;
+
+		ReadDymInput readDym_;
+		readDym_.defineMethodSymmetries(1, 0, 0.0e0, 0.0e0, 0.0e0);
+		DymOptions dymOptions_ = readDym_.getDymOptions();
+		dymOptions_.outName = line;
+		Analyze an_;
+		an_.chargeDistribution(dymOptions_);
+	}
+}
+
 
 
 /* symmetrize

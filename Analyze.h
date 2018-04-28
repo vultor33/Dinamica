@@ -28,6 +28,8 @@ private:
 
 	void printCoulombAtoms(std::vector<double> & atoms, std::string testName, std::vector<double> &atomsCharge);
 
+	void analyzeProducts(std::vector< std::vector<CoordXYZ> > &allMol, int &productCode, std::string &productName);
+
 
 
 };

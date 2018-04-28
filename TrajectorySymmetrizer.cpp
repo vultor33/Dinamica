@@ -82,6 +82,7 @@ void TrajectorySymmetrizer::symmetrize(int option,
 		v[10] = v[8]; //vzele2 -> vzele1
 		break;
 
+
 	default:
 		cout << "symmetrization not found - exiting" << endl;
 		exit(1);

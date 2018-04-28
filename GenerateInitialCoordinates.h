@@ -13,7 +13,7 @@ public:
 
 	~GenerateInitialCoordinates();
 
-	void generateInitial(
+	bool generateInitial(
 		DymOptions &dymOptions_,
 		std::vector<double> &x, 
 		std::vector<double> &v, 
@@ -125,7 +125,7 @@ private:
 
 
 
-	void generateElectronsAtCenter(
+	bool generateElectronsAtCenter(
 		std::vector<double> &xPositions,
 		std::vector<double> &vVelocities,
 		std::vector<double> &atomsMass,
@@ -133,12 +133,13 @@ private:
 		DymOptions &dymOptions);
 
 
+	/*
+	void initialVelocities(
+		double deltaEnergy,
+		vector<double> &v,
+		DymOptions &dymOption_);
 
-
-
-
-
-
+		*/
 
 
 

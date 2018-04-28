@@ -3,6 +3,7 @@
 #include <vector>
 #include <cmath>
 #include <iostream>
+#include <fstream>
 
 #include "DynamicsStructs.h"
 #include "AuxMath.h"
@@ -18,13 +19,15 @@ GenerateInitialCoordinates::GenerateInitialCoordinates()
 
 GenerateInitialCoordinates::~GenerateInitialCoordinates(){}
 
-void GenerateInitialCoordinates::generateInitial(
+bool GenerateInitialCoordinates::generateInitial(
 	DymOptions &dymOptions_,
 	std::vector<double> &x,
 	std::vector<double> &v,
 	std::vector<double> &atomsMass,
 	std::vector<double> &atomsCharge)
 {
+	bool sucess = true;
+
 	switch (dymOptions_.simulationType)
 	{
 	case 0:
@@ -91,12 +94,14 @@ void GenerateInitialCoordinates::generateInitial(
 		break;
 
 	case 10:
-		generateElectronsAtCenter(
+		sucess = generateElectronsAtCenter(
 			x,
 			v,
 			atomsMass,
 			atomsCharge,
 			dymOptions_);
+		if (!sucess)
+			return false;
 		break;
 
 	default:
@@ -113,6 +118,7 @@ void GenerateInitialCoordinates::generateInitial(
 	v[2] -= dymOptions_.initialSpeed;
 	v[3] -= dymOptions_.initialSpeed;
 	translateToCenterOfMass(x, atomsMass);
+	return sucess;
 
 }
 
@@ -500,10 +506,9 @@ void GenerateInitialCoordinates::velocityCmCorrection(std::vector<double> &v, st
 		vmy += v[i + natm] * atomsMass[i + natm];
 		vmz += v[i + 2 * natm] * atomsMass[i + 2 * natm];
 	}
-	// imprecisao numerica
-	double vPCorrX = vmx / (2.0e0 * mProton);
-	double vPCorrY = vmy / (2.0e0 * mProton);
-	double vPCorrZ = vmz / (2.0e0 * mProton);
+	double vPCorrX = vmx / (2.0e0 + 2.0e0 * mProton);
+	double vPCorrY = vmy / (2.0e0 + 2.0e0 * mProton);
+	double vPCorrZ = vmz / (2.0e0 + 2.0e0 * mProton);
 	v[1] -= vPCorrX;
 	v[3] -= vPCorrX;
 	v[5] -= vPCorrY;
@@ -602,7 +607,7 @@ void GenerateInitialCoordinates::generateInitialPositionAndVelocity(
 
 
 // DEFINICAO DO NOVO CONJUNTO DE TRAJETORIAS
-void GenerateInitialCoordinates::generateElectronsAtCenter(
+bool GenerateInitialCoordinates::generateElectronsAtCenter(
 	std::vector<double> &xPositions,
 	std::vector<double> &vVelocities,
 	std::vector<double> &atomsMass,
@@ -639,9 +644,9 @@ void GenerateInitialCoordinates::generateElectronsAtCenter(
 
 	double vInitial;
 	if ((energy - vPotential) < 0.0e0)
-		vInitial = 10000.0e0;
-	else
-		vInitial = sqrt(energy - vPotential);
+	{
+		return false;
+	}
 
 	if (dymOptions_.initialPositionType == 0)
 	{
@@ -653,6 +658,9 @@ void GenerateInitialCoordinates::generateElectronsAtCenter(
 		x1[4] = rElec; //ze
 		x1[5] = rProton; //zp
 	}
+
+
+	vInitial = sqrt(energy - vPotential);
 
 	AuxMath auxMath_;
 	double auxV1, auxV2;
@@ -670,7 +678,7 @@ void GenerateInitialCoordinates::generateElectronsAtCenter(
 
 	if (dymOptions_.initialPositionType == 0)
 	{
-		v1[0] = auxV1; //vye
+		v1[0] = auxV1; //vxe
 		v1[4] = auxV2; //vze
 	}
 	else if (dymOptions_.initialPositionType == 1)
@@ -703,7 +711,54 @@ void GenerateInitialCoordinates::generateElectronsAtCenter(
 
 	atomsMass = addAtom(aM1, aM2);
 	atomCharge = insertVector(aC1, aC2);
+
+	return true;
 }
 
 
+/*
+void GenerateInitialCoordinates::initialVelocities(
+	double deltaEnergy,
+	vector<double> &v,
+	DymOptions &dymOption_)
+{
+	// duas condicoes - centro e canto.
 
+
+
+
+
+
+
+	double vInitial = sqrt(deltaEnergy);
+
+	AuxMath auxMath_;
+	double auxV1, auxV2;
+	if (abs(angle - 90) < 0.00001)
+	{
+		auxV1 = 0.0e0;
+		auxV2 = vInitial;
+	}
+	else
+	{
+		double tanAngle = tan(angle * auxMath_._pi / (180.0e0));
+		auxV1 = sqrt(vInitial*vInitial / (1 + tanAngle * tanAngle));
+		auxV2 = auxV1 * tanAngle;
+	}
+
+	if (dymOptions_.initialPositionType == 0)
+	{
+		v1[0] = auxV1; //vxe
+		v1[4] = auxV2; //vze
+	}
+	else if (dymOptions_.initialPositionType == 1)
+	{
+		v1[2] = auxV1; //vye
+		v1[0] = auxV2; //vxe
+	}
+
+
+}
+
+
+*/
