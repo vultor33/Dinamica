@@ -12,17 +12,23 @@ int main(int argc, char *argv[])
 	{
 		CalculateScreening calScreen_;
 
-		//zeros removidos, fazer eles depois sozinhos com tratamento especial.
+		/*
+		Trajetorias com angulo zero removidas, fazer elas depois.
+		IMPORTANTE: trocar para runge kutta de passo variavel e monitorar a energia FINAL e INICIAL.
+		*/
 
-		calScreen_.analyzeAll();
+
+		//calScreen_.analyzeAll();
 
 		//calScreen_.screenDynamicCenter(1, 0);
 
 		//calScreen_.screenDynamicRear(2, 1);
 
-		//calScreen_.screenDynamicCenterPure(4, 0, 15.0e0);
+		//calScreen_.screenDynamicCenterPure(3, 0, 15.0e0);
 
 		//calScreen_.screenDynamicRearPure(2, 1, 15.0e0);
+
+		calScreen_.calcOne();
 
 	}
 	return 0;

@@ -133,13 +133,10 @@ private:
 		DymOptions &dymOptions);
 
 
-	/*
 	void initialVelocities(
 		double deltaEnergy,
-		vector<double> &v,
+		std::vector<double> &v,
 		DymOptions &dymOption_);
-
-		*/
 
 
 

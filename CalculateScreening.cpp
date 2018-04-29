@@ -193,30 +193,29 @@ void CalculateScreening::screenDynamicRearPure(int symmetricType, int initialPos
 
 void  CalculateScreening::calcOne()
 {
+	int symmetricType = 1;
+	int initialPositions = 0;
 	int iPro = 0;
-	int iEle = 0;
-	int iAngle = 90;
+	int iEle = 3;
+	int iAngle = 65.0e0;
 	int k = 0;
 
 	double rProton = (double)iPro * 0.1e0 + 0.5156992;
 	double rEle = (double)iEle * 0.1e0 + 0.893217217;
 
 	ReadDymInput readDym_;
-	readDym_.defineMethodSymmetries(3, 0, rEle, rProton, (double)iAngle);
-	readDym_.electronPlot();
+	readDym_.defineMethodSymmetries(symmetricType, initialPositions, rEle, rProton, iAngle);
+	readDym_.analyzePlot();
 	readDym_.addIToName(k);
 	k++;
 	DymOptions dymOptions_ = readDym_.getDymOptions();
 	srand(dymOptions_.seed);
 
 	Simulation sim(dymOptions_);
-	bool forcedStop = sim.startSimulation();
-	if (forcedStop)
+	int stopStatus = sim.startSimulation();
+	if (stopStatus == 1)
 	{
-		ofstream excelResult_;
-		excelResult_.open(dymOptions_.excelResultsName.c_str(), std::ofstream::out | std::ofstream::app);
-		excelResult_ << dymOptions_.outName << ";failed" << endl;
-		excelResult_.close();
+		k--;
 	}
 	else
 	{

@@ -687,6 +687,9 @@ bool GenerateInitialCoordinates::generateElectronsAtCenter(
 		v1[0] = auxV2; //vxe
 	}
 
+	//generating initial velocities with a correction at the center of mass
+	initialVelocities(energy - vPotential, v1, dymOptions_);
+
 	x2 = x1;
 	v2 = v1;
 	aM2 = aM1;
@@ -699,11 +702,15 @@ bool GenerateInitialCoordinates::generateElectronsAtCenter(
 	{
 		xPositions[6] = -xPositions[2];
 		xPositions[11] = -xPositions[9];
+		vVelocities[6] = vVelocities[2];
+		vVelocities[11] = vVelocities[9];
 	}
 	else if (dymOptions_.initialPositionType == 1)
 	{
 		xPositions[10] = -xPositions[8];
 		xPositions[11] = -xPositions[9];
+		vVelocities[10] = vVelocities[8];
+		vVelocities[11] = vVelocities[9];
 	}
 
 	TrajectorySymmetrizer symm_;
@@ -716,49 +723,85 @@ bool GenerateInitialCoordinates::generateElectronsAtCenter(
 }
 
 
-/*
 void GenerateInitialCoordinates::initialVelocities(
 	double deltaEnergy,
 	vector<double> &v,
-	DymOptions &dymOption_)
+	DymOptions &dymOptions_)
 {
 	// duas condicoes - centro e canto.
 
 
-
-
-
-
-
-	double vInitial = sqrt(deltaEnergy);
-
+	double vInitial, VZ, VX;
 	AuxMath auxMath_;
 	double auxV1, auxV2;
-	if (abs(angle - 90) < 0.00001)
+	if (abs(dymOptions_.angle - 90) < 0.00001)
 	{
-		auxV1 = 0.0e0;
-		auxV2 = vInitial;
+		cout << "not programmed yet - exiting" << endl;
+		exit(1);
+		//auxV1 = 0.0e0;
+		//auxV2 = vInitial;
 	}
-	else
-	{
-		double tanAngle = tan(angle * auxMath_._pi / (180.0e0));
-		auxV1 = sqrt(vInitial*vInitial / (1 + tanAngle * tanAngle));
-		auxV2 = auxV1 * tanAngle;
-	}
+	double tanTeta = tan(dymOptions_.angle / 180.0e0);
+	double tanSquare = tanTeta * tanTeta;
+	double mOneTanSqrt = mProton * (1.0e0 + tanSquare);
 
 	if (dymOptions_.initialPositionType == 0)
 	{
-		v1[0] = auxV1; //vxe
-		v1[4] = auxV2; //vze
+		if (dymOptions_.symmetrize == 1)
+		{
+			vInitial = sqrt(deltaEnergy);
+			auxV1 = vInitial * sqrt(1.0e0 / (1 + tanSquare));
+			auxV2 = auxV1 * tanTeta;
+		}
+		if (dymOptions_.symmetrize == 2)
+		{
+			vInitial = sqrt((mOneTanSqrt / (mOneTanSqrt + 1.0e0)) * deltaEnergy);
+			auxV1 = vInitial * sqrt(1.0e0 / (1 + tanSquare));
+			auxV2 = auxV1 * tanTeta;
+			VX = -(vInitial) / (mProton * sqrt(1.0e0 + tanSquare));
+			v[1] = VX; //vpe
+		}
+		else if (dymOptions_.symmetrize == 3)
+		{
+			vInitial = sqrt((mOneTanSqrt / (mOneTanSqrt + tanSquare)) * deltaEnergy);
+			auxV1 = vInitial * sqrt(1.0e0 / (1 + tanSquare));
+			auxV2 = auxV1 * tanTeta;
+			VZ = -(vInitial*tanTeta) / (mProton * sqrt(1.0e0 + tanSquare));
+			v[5] = VZ; //vpe
+		}
+		else if (dymOptions_.symmetrize == 4)
+		{
+			vInitial = sqrt((mProton / (mProton + 1.0e0)) * deltaEnergy);
+			auxV1 = vInitial * sqrt(1.0e0 / (1 + tanSquare));
+			auxV2 = auxV1 * tanTeta;
+			VX = -(vInitial) / (mProton * sqrt(1.0e0 + tanSquare));
+			v[1] = VX; //vpe
+			VZ = -(vInitial*tanTeta) / (mProton * sqrt(1.0e0 + tanSquare));
+			v[5] = VZ; //vpe
+		}
+		v[0] = auxV1; //vxe
+		v[4] = auxV2; //vze
 	}
 	else if (dymOptions_.initialPositionType == 1)
 	{
-		v1[2] = auxV1; //vye
-		v1[0] = auxV2; //vxe
+		if (dymOptions_.symmetrize == 2)
+		{
+			vInitial = sqrt((mOneTanSqrt / (mOneTanSqrt + tanSquare)) * deltaEnergy);
+			auxV1 = vInitial * sqrt(1.0e0 / (1 + tanSquare));
+			auxV2 = auxV1 * tanTeta;
+			VX = -(vInitial*tanTeta) / (mProton * sqrt(1.0e0 + tanSquare));
+			v[1] = VX; //vpe
+		}
+		v[2] = auxV1; //vye
+		v[0] = auxV2; //vxe
 	}
 
 
+	/*
+	excel
+	
+	
+	*/
+
 }
 
-
-*/
