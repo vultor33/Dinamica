@@ -132,7 +132,7 @@ void ReadDymInput::generateDefaultOptions()
 	dymOptionsDefault.outName = "simulation.xyz";
 
 	dymOptionsDefault.iterationLoop = 10000;
-	dymOptionsDefault.printLoop = 300;
+	dymOptionsDefault.printLoop = 100;
 	dymOptionsDefault.timeStep = 0.001e0;
 
 	//stop when particcles are too far

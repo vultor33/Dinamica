@@ -90,6 +90,80 @@ void TrajectorySymmetrizer::symmetrize(int option,
 
 }
 
+void TrajectorySymmetrizer::symmetrize(int option,
+	state_type &dxdt)
+{
+	switch (option)
+	{
+	case 0:
+		return;
+
+	case 1: // inversion center
+		dxdt[2] = -dxdt[0];   // xe2  -> xe1
+		dxdt[3] = -dxdt[1];   // xp2  -> xp1
+		dxdt[6] = -dxdt[4];   // ye2  -> ye1
+		dxdt[7] = -dxdt[5];   // yp2  -> yp1 
+		dxdt[10] = -dxdt[8];  // ze2  -> ze1
+		dxdt[11] = -dxdt[9];  // zp2  -> zp1 
+		dxdt[14] = -dxdt[12]; // vxe2 -> vxe1
+		dxdt[15] = -dxdt[13]; // vxp2 -> vxp1
+		dxdt[18] = -dxdt[16]; // vye2 -> vye1
+		dxdt[19] = -dxdt[17]; // vyp2 -> vyp1 
+		dxdt[22] = -dxdt[20]; // vze2 -> vze1
+		dxdt[23] = -dxdt[21]; // vzp2 -> vzp1 
+		break;
+
+	case 2: // C2x (x->x ; y->-y ; z->-z)
+		dxdt[2] = dxdt[0];   // xe2  -> xe1
+		dxdt[3] = dxdt[1];   // xp2  -> xp1
+		dxdt[6] = -dxdt[4];   // ye2  -> ye1
+		dxdt[7] = -dxdt[5];   // yp2  -> yp1 
+		dxdt[10] = -dxdt[8];  // ze2  -> ze1
+		dxdt[11] = -dxdt[9];  // zp2  -> zp1 
+		dxdt[14] = dxdt[12]; // vxe2 -> vxe1
+		dxdt[15] = dxdt[13]; // vxp2 -> vxp1
+		dxdt[18] = -dxdt[16]; // vye2 -> vye1
+		dxdt[19] = -dxdt[17]; // vyp2 -> vyp1 
+		dxdt[22] = -dxdt[20]; // vze2 -> vze1
+		dxdt[23] = -dxdt[21]; // vzp2 -> vzp1 
+		break;
+
+	case 3: // C2z (x-> -x; y->-y  ze2->ze1)
+		dxdt[2] = -dxdt[0];   // xe2  -> xe1
+		dxdt[3] = -dxdt[1];   // xp2  -> xp1
+		dxdt[6] = -dxdt[4];   // ye2  -> ye1
+		dxdt[7] = -dxdt[5];   // yp2  -> yp1 
+		dxdt[10] = dxdt[8];  // ze2  -> ze1
+//		dxdt[11] = -dxdt[9];  // zp free
+		dxdt[14] = -dxdt[12]; // vxe2 -> vxe1
+		dxdt[15] = -dxdt[13]; // vxp2 -> vxp1
+		dxdt[18] = -dxdt[16]; // vye2 -> vye1
+		dxdt[19] = -dxdt[17]; // vyp2 -> vyp1 
+		dxdt[22] = dxdt[20]; // vze2 -> vze1
+//		dxdt[23] = -dxdt[21]; // zp free
+		break;
+
+	case 4:  // Cs (y->-y)
+		dxdt[2] = dxdt[0];   // xe2  -> xe1
+		dxdt[6] = -dxdt[4];   // ye2  -> ye1
+
+		dxdt[7] = 0.0e0;// yp2  -> yp1 
+		dxdt[5] = 0.0e0; 
+
+		dxdt[10] = dxdt[8];  // ze2  -> ze1
+		dxdt[14] = dxdt[12]; // vxe2 -> vxe1
+		dxdt[18] = -dxdt[16]; // vye2 -> vye1
+
+		dxdt[22] = dxdt[20]; // vze2 -> vze1
+		break;
+
+	default:
+		return;
+		cout << "symmetrization not found - exiting" << endl;
+		exit(1);
+	}
+
+}
 
 
 

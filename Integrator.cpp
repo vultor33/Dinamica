@@ -5,9 +5,15 @@
 #include <vector>
 #include <iomanip>
 #include <fstream>
+#include <boost/numeric/odeint.hpp>
 
 #include "Fitness.h"
 #include "TrajectorySymmetrizer.h"
+#include "FitnessCoulombOdeint.h"
+
+typedef std::vector< double > state_type;
+typedef boost::numeric::odeint::runge_kutta_dopri5< double > stepper_type;
+typedef boost::numeric::odeint::runge_kutta_cash_karp54< state_type > error_stepper_type;
 
 using namespace std;
 
@@ -16,6 +22,9 @@ Integrator::Integrator()
 	printEnergy = false;
 	symmetrize = 0;
 	integratorType = 0;
+	adaptativeError = 1.0e-12;
+	defaultTimeStep = 1.0e-3;
+
 	rksParams.resize(19);
 	rksParams[0] = 0.095176255;
 	rksParams[1] = 0.666296894;
@@ -51,13 +60,47 @@ void Integrator::setAdditionalParams(
 
 void Integrator::setOptions(bool printEnergy_in, int symmetrize_in)
 {
-	printEnergy = printEnergy_in;
+	//printEnergy = printEnergy_in;
 	if (printEnergy)
 	{
 		printEnergyFile_.open("printEnergyFile.csv");
 	}
 	symmetrize = symmetrize_in;
 }
+
+
+void Integrator::odeintAdaptativeIntegrator(
+	std::vector<double> & xInitial,
+	std::vector<double> & vInitial,
+	double wholeTimeStep)
+{
+	FitnessCoulombOdeint function(symmetrize);
+
+	state_type x(xInitial.size() * 2);
+	for (int i = 0; i < xInitial.size(); i++)
+	{
+		x[i] = xInitial[i];
+		x[i + 12] = vInitial[i];
+	}
+
+	boost::numeric::odeint::integrate_adaptive(
+		boost::numeric::odeint::make_controlled< error_stepper_type >
+		(adaptativeError, adaptativeError), // error handling
+		function,                           // function
+		x,                                  // initial state
+		0.0e0,                              // initial time
+		wholeTimeStep,                      // end_time
+		defaultTimeStep);                   // delta time
+
+	for (int i = 0; i < xInitial.size(); i++)
+	{
+		xInitial[i] = x[i];
+		vInitial[i] = x[i + 12];
+	}
+
+	// adicionar simetrizacao aqui se for o caso.
+}
+
 
 void Integrator::rungeKuttaSimetrico(
 	std::vector<double> & xInitial,

@@ -6,6 +6,7 @@
 #include <fstream>
 
 #include "DynamicsStructs.h"
+#include "Fitness.h"
 
 class Simulation
 {
@@ -27,30 +28,7 @@ public:
 	void additionalOptions(std::string flag, bool option);
 
 private:
-	DymOptions dymOptions_;
-
-	std::ofstream posVel_;
-
 	bool stopSimulation;
-
-	/*
-	double timeStep;
-	int iterationLoop;
-	int printLoop;
-	double initialDistance;
-	double impactParameter;
-	double initialSpeed;
-	bool checkStopSimulationConditions;
-	bool printEnergy;
-	bool simmetrize;
-	bool printMovie;
-	bool printPosVel;
-	double maxStopSimulationDistance;
-	double temperatureUnit;
-	double mProton;
-	std::string outputName;
-	*/
-
 
 	void checkStopSimulation(std::vector<double> &x);
 
@@ -59,12 +37,16 @@ private:
 		std::string testName,
 		std::vector<double> &atomsCharge);
 
-	void printPositionsAndVelocities(
+	void printSimulationInfo(
 		std::vector<double> &x,
 		std::vector<double> &v,
+		std::vector<double> &atomsCharge,
+		std::vector<double> &atomsMass,
 		std::ofstream &posVelFile_);
 
-//	void initialVelocityKinecticTheory(double TempKelvin);
+	DymOptions dymOptions_;
+	std::ofstream posVel_;
+	Fitness fit_;
 
 };
 

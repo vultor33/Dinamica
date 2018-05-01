@@ -29,6 +29,7 @@ Simulation::~Simulation(){}
 
 int Simulation::startSimulation()
 {
+	// Initializing coordinates
 	GenerateInitialCoordinates genInitial_;
 	vector<double> x, v, atomsMass, atomsCharge;
 	bool sucess = genInitial_.generateInitial(dymOptions_,
@@ -36,14 +37,13 @@ int Simulation::startSimulation()
 		v,
 		atomsMass,
 		atomsCharge);
-
 	if (!sucess)
 		return 1;
 
+	// Options
 	Integrator rk_;
 	rk_.setAdditionalParams(atomsMass, atomsCharge);
 	rk_.setOptions(dymOptions_.printEnergy, dymOptions_.symmetrize);
-
 	if (dymOptions_.printMovie)
 	{
 		remove(dymOptions_.outName.c_str());
@@ -52,39 +52,59 @@ int Simulation::startSimulation()
 	if (dymOptions_.printPosVel)
 	{
 		stringstream buildName;
-		buildName << dymOptions_.seed << "-"
-			<< dymOptions_.impactFactorAu << "-"
-			<< dymOptions_.simulationType;
-
+		buildName << "-info-" << dymOptions_.outName;
 		string posVelName = "simulation-" + buildName.str() + ".csv";
 		posVel_.open(posVelName);
 		posVel_ << "xE1 ; vxE1 ; xP1 ; vxP1 ; xE2 ; vxE2; xP2 ; vxP2 ;"
 			<< " yE1 ; vyE1 ; yP1 ; vyP1 ; yE2 ; vyE2; yP2 ; vyP2 ;"
-			<< " zE1 ; vzE1 ; zP1 ; vzP1 ; zE2 ; vzE2; zP2 ; vzP2 "
+			<< " zE1 ; vzE1 ; zP1 ; vzP1 ; zE2 ; vzE2; zP2 ; vzP2 ; "
+			<< " Ep;Ek;Et;cmx;cmy;cmz"
 			<< endl;
 	}
 	if (dymOptions_.printPosVel)
-		printPositionsAndVelocities(x, v, posVel_);
+		printSimulationInfo(x, v, atomsCharge, atomsMass, posVel_);
+
+	// SIMULATION
+	double initialEnergy = fit_.calculateTotalEnergyCoulomb(x,v,atomsCharge,atomsMass);
+	double initialAngularMomentum = fit_.calculateTotalAngularMomentum(x, v, atomsMass);
 	for (int i = 0; i < dymOptions_.printLoop; i++)
 	{
-		for (int j = 0; j < dymOptions_.iterationLoop; j++)
+		rk_.odeintAdaptativeIntegrator(x, v, dymOptions_.timeStep * dymOptions_.iterationLoop);
+
+		/*
+		for (size_t i = 0; i < dymOptions_.iterationLoop; i++)
 		{
 			rk_.rungeKuttaSimetrico(x, v, dymOptions_.timeStep);
 		}
+		*/
+
 		if (dymOptions_.checkStopSimulationConditions)
 			checkStopSimulation(x);
 		if (stopSimulation)
 		{
-			return 2;
+			break;
 		}
 		if (dymOptions_.printPosVel)
-			printPositionsAndVelocities(x, v, posVel_);
+			printSimulationInfo(x, v, atomsCharge, atomsMass, posVel_);
 
 		if (dymOptions_.printMovie)
 		{
 			printCoulombAtoms(x, dymOptions_.outName, atomsCharge);
 		}
 	}
+
+	//PRINT RESULT SUMMARY
+	double finalEnergy = fit_.calculateTotalEnergyCoulomb(x, v, atomsCharge, atomsMass);
+	double finalAngularMomentum = fit_.calculateTotalAngularMomentum(x, v, atomsMass);
+	ofstream excelResult_;
+	excelResult_.open(dymOptions_.excelResultsName.c_str(), std::ofstream::out | std::ofstream::app);
+	excelResult_ << dymOptions_.outName << ";"
+		<< initialAngularMomentum << ";"
+		<< abs(finalAngularMomentum - initialAngularMomentum) / ((double)dymOptions_.printLoop) << ";"
+		<< abs(finalEnergy - initialEnergy) / ((double)dymOptions_.printLoop) << ";";
+	fit_.printCenterOfMass(x, atomsMass, excelResult_);
+	excelResult_.close();
+
 	return 0;
 
 }
@@ -134,15 +154,25 @@ void Simulation::printCoulombAtoms(vector<double> & atoms, string testName, vect
 	teste_.close();
 }
 
-void Simulation::printPositionsAndVelocities(
+void Simulation::printSimulationInfo(
 	std::vector<double> &x,
 	std::vector<double> &v,
+	std::vector<double> &atomsCharge,
+	std::vector<double> &atomsMass,
 	ofstream &posVelFile_)
 {
 	for (size_t i = 0; i < x.size(); i++)
 	{
 		posVelFile_ << x[i] << " ; " << v[i] << " ; ";
 	}
+	fit_.calculateTotalCoulombSystemEnergy(
+		x,
+		v,
+		atomsCharge,
+		atomsMass,
+		posVelFile_);
+	fit_.printCenterOfMass(x, atomsMass, posVelFile_);
+
 	posVelFile_ << endl;
 
 	/* MOMENTO ANGULAR

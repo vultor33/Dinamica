@@ -172,7 +172,7 @@ void Analyze::chargeDistribution(DymOptions &dymOptions_)
 	else if (amplMax.size() > 1)
 		amplMeanValue /= (double)(amplMax.size() - 1);
 	else
-		amplMeanValue = 300.0e0;
+		amplMeanValue = -1.0e0;
 
 	string productName;
 	int productCode;
@@ -180,8 +180,9 @@ void Analyze::chargeDistribution(DymOptions &dymOptions_)
 
 	ofstream excelResult_;
 	excelResult_.open(dymOptions_.excelResultsName.c_str(), std::ofstream::out | std::ofstream::app);
-	excelResult_ << dymOptions_.outName << ";" 
-		<< rppMean / allMol.size() << ";" 
+//	excelResult_ << dymOptions_.outName << ";" 
+	excelResult_ 
+		<< rppMean / allMol.size() << ";"
 		<< amplMeanValue << ";"  
 		<< productCode << ";"
 		<< productName << ";" << endl;

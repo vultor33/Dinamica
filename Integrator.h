@@ -13,6 +13,12 @@ public:
 	Integrator();
 	~Integrator();
 
+	void odeintAdaptativeIntegrator(
+		std::vector<double> & xInitial,
+		std::vector<double> & vInitial,
+		double wholeTimeStep);
+
+
 	// nao funciona em campo magnetico
 	void rungeKuttaSimetrico(
 		std::vector<double> & xInitial,
@@ -30,6 +36,8 @@ private:
 	int integratorType;
 	bool printEnergy;
 	int symmetrize;
+	double adaptativeError;
+	double defaultTimeStep;
 	std::vector<double> rksParams;
 	std::vector<double> atomsCharge;
 	std::vector<double> atomsMass;

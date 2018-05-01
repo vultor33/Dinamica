@@ -28,6 +28,14 @@ int main(int argc, char *argv[])
 
 		//calScreen_.screenDynamicRearPure(2, 1, 15.0e0);
 
+
+		remove("simulationResults.csv");
+		ofstream excelResult_;
+		excelResult_.open("simulationResults.csv", std::ofstream::out | std::ofstream::app);
+		excelResult_ << "Simulation Name;Ltotal;Ltotal error;Etotal error;CMx final;CMy final;CMz final;rpp mean;amplitude;product code; product string" << endl;
+		excelResult_.close();
+
+
 		calScreen_.calcOne();
 
 	}

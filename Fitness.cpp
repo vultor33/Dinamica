@@ -1,5 +1,3 @@
-//#define useDlib
-
 #include "Fitness.h"
 
 #include <vector>
@@ -9,18 +7,19 @@
 #include <iomanip>
 #include <stdlib.h>
 
-#include "WriteQuantumInput.h"
-#include "ReadQuantumOutput.h"
-
-#ifdef useDlib
-#include <dlib/optimization.h>
-#include "FunctionDlib.h"
-#include "DerivativeDlib.h"
-#endif
+#include "AuxMath.h"
 
 using namespace std;
 
-Fitness::Fitness(){}
+Fitness::Fitness()
+{
+	atomsChargeFit.resize(4);
+	mProton = 1836.15273443449e0;
+	atomsChargeFit[0] = -1.0e0;
+	atomsChargeFit[1] = 1.0e0;
+	atomsChargeFit[2] = -1.0e0;
+	atomsChargeFit[3] = 1.0e0;
+}
 
 Fitness::~Fitness(){}
 
@@ -123,7 +122,7 @@ double Fitness::CoulombEnergy(vector<double> &x, vector<double> & atomsCharge)
 }
 
 
-bool Fitness::CoulombGradient(
+void Fitness::CoulombGradient(
 	vector<double> &x, 
 	vector<double> &gradient,
 	vector<double> &atomsCharge)
@@ -152,7 +151,55 @@ bool Fitness::CoulombGradient(
 			gradient[j + 2 * natm] -= dCoulomb * (x[i + 2 * natm] - x[j + 2 * natm]);
 		}
 	}
-	return true;
+}
+
+void Fitness::CoulombGradient(
+	const state_type &x,
+	state_type &dxdt)
+{
+	/* state_type:
+	xe1 - 0, xp1 - 1, xe2 - 2, xp2 - 3,
+	ye1 - 4, yp1 - 5, ye2 - 6, yp2 - 7,
+	ze1 - 8, zp1 - 9, ze2 - 10, zp2 - 11
+	vxe1 - 12, vxp1 - 13, vxe2 - 14, vxp2 - 15,
+	vye1 - 16, vyp1 - 17, vye2 - 18, vyp2 - 19,
+	vze1 - 20, vzp1 - 21, vze2 - 22, vzp2 - 23 */
+
+	int natm = x.size() / 6;
+	for (size_t i = 0; i < dxdt.size(); i++)
+		dxdt[i] = 0.0e0;
+
+	for (size_t i = 0; i < 12; i++)
+		dxdt[i] = x[i + 12]; // velocities dxdt-x1,x2 stays at x12,x13...
+
+	//dxdt de v ==> F/m
+	double r, dCoulomb;
+	for (int i = 0; i < (natm - 1); i++)
+	{
+		for (int j = (i + 1); j < natm; j++)
+		{
+			r = sqrt(
+				(x[i] - x[j])*(x[i] - x[j]) +
+				(x[i + natm] - x[j + natm])*(x[i + natm] - x[j + natm]) +
+				(x[i + 2 * natm] - x[j + 2 * natm])*(x[i + 2 * natm] - x[j + 2 * natm])
+			);
+			dCoulomb = (atomsChargeFit[i] * atomsChargeFit[j]) / (r * r * r);
+			dxdt[12 + i] += dCoulomb * (x[i] - x[j]);
+			dxdt[12 + j] -= dCoulomb * (x[i] - x[j]);
+			dxdt[12 + i + natm] += dCoulomb * (x[i + natm] - x[j + natm]);
+			dxdt[12 + j + natm] -= dCoulomb * (x[i + natm] - x[j + natm]);
+			dxdt[12 + i + 2 * natm] += dCoulomb * (x[i + 2 * natm] - x[j + 2 * natm]);
+			dxdt[12 + j + 2 * natm] -= dCoulomb * (x[i + 2 * natm] - x[j + 2 * natm]);
+		}
+	}
+
+	dxdt[13] /= mProton;
+	dxdt[15] /= mProton;
+	dxdt[17] /= mProton;
+	dxdt[19] /= mProton;
+	dxdt[21] /= mProton;
+	dxdt[23] /= mProton;
+
 }
 
 void Fitness::calculateTotalCoulombSystemEnergy(
@@ -173,10 +220,66 @@ void Fitness::calculateTotalCoulombSystemEnergy(
 			(v[i + 2 * natm] * v[i + 2 * natm]));
 	}
 	double eTot = ePotential + eKinetic;
-	printFile_ << "pot: " << fixed << setprecision(12) << setw(16) << ePotential
-		<< " kin: " << fixed << setprecision(12) << setw(16) << eKinetic
-		<< " tot: " << fixed << setprecision(12) << setw(16) << eTot;
+	printFile_ << fixed << setprecision(12) << setw(16) << ePotential << ";"
+		<< fixed << setprecision(12) << setw(16) << eKinetic << ";"
+		<< fixed << setprecision(12) << setw(16) << eTot << ";";
 }
+
+
+double Fitness::calculateTotalEnergyCoulomb(
+	std::vector<double> &x,
+	std::vector<double> &v,
+	std::vector<double> &atomsCharge,
+	std::vector<double> &atomsMass)
+{
+	double ePotential = CoulombEnergy(x, atomsCharge);
+	int natm = atomsCharge.size();
+	double eKinetic = 0.0e0;
+	for (int i = 0; i < natm; i++)
+	{
+		eKinetic += 0.5e0 * atomsMass[i] * (
+			(v[i] * v[i]) +
+			(v[i + natm] * v[i + natm]) +
+			(v[i + 2 * natm] * v[i + 2 * natm]));
+	}
+	return ePotential + eKinetic;
+}
+
+double Fitness::calculateTotalAngularMomentum(
+	std::vector<double> &x,
+	std::vector<double> &v,
+	std::vector<double> &atomsMass)
+{
+	/* x and v
+	xe1 - 0, xp1 - 1, xe2 - 2, xp2 - 3,
+		ye1 - 4, yp1 - 5, ye2 - 6, yp2 - 7,
+		ze1 - 8, zp1 - 9, ze2 - 10, zp2 - 11
+	*/
+
+	AuxMath auxMath_;
+	vector<double> Le1, Le2, Lp1, Lp2, Ltotal;
+
+	Le1 = auxMath_.vectorProduct(
+		x[0], x[4], x[8],
+		v[0], v[4], v[8]);
+	Lp1 = auxMath_.vectorProduct(
+		x[1], x[5], x[9],
+		v[1], v[5], v[9]);
+	Le2 = auxMath_.vectorProduct(
+		x[2], x[6], x[10],
+		v[2], v[6], v[10]);
+	Lp2 = auxMath_.vectorProduct(
+		x[3], x[7], x[11],
+		v[3], v[7], v[11]);
+
+	Ltotal.resize(3);
+	Ltotal[0] = Le1[0] + mProton * Lp1[0] + Le2[0] + mProton * Lp2[0];
+	Ltotal[1] = Le1[1] + mProton * Lp1[1] + Le2[1] + mProton * Lp2[1];
+	Ltotal[2] = Le1[2] + mProton * Lp1[2] + Le2[2] + mProton * Lp2[2];
+
+	return auxMath_.norm(Ltotal[0], Ltotal[1], Ltotal[2]);
+}
+
 
 void Fitness::printCenterOfMass(
 	std::vector<double> &x,
@@ -198,50 +301,10 @@ void Fitness::printCenterOfMass(
 	cmy /= natm;
 	cmz /= natm;
 
-	printFile_ << " cmx: " << fixed << setprecision(12) << setw(16) << cmx
-		<< " cmy: " << fixed << setprecision(12) << setw(16) << cmy
-		<< " cmz: " << fixed << setprecision(12) << setw(16) << cmz;
+	printFile_ << fixed << setprecision(12) << setw(16) << cmx << ";"
+		<< fixed << setprecision(12) << setw(16) << cmy << ";"
+		<< fixed << setprecision(12) << setw(16) << cmz << ";";
 }
-
-
-double Fitness::runGamess(
-	vector<double> &x, 
-	vector<string> &options, 
-	string gamessPath,
-	string gamessScr,
-	string nProc)
-{
-	WriteQuantumInput writeInp_(options);
-	int nAtoms = x.size() / 3;
-	vector<CoordXYZ> mol(nAtoms);
-	for (int i = 0; i < nAtoms; i++)
-	{
-		mol[i].atomlabel = "N";
-		mol[i].x = x[i];
-		mol[i].y = x[i + nAtoms];
-		mol[i].z = x[i + 2 * nAtoms];
-	}
-	writeInp_.createInput(mol);
-
-	system(("rm /scr/" + options[1] + "*").c_str());
-
-	system((gamessPath + "  " + options[1] + ".inp  00  " + nProc + " > " + options[1] + ".log").c_str());
-		
-	ReadQuantumOutput readQ_("gamess");
-
-	readQ_.readOutput((options[1] + ".log").c_str());
-
-	mol = readQ_.getCoordinates();
-	for (int i = 0; i < nAtoms; i++)
-	{
-		x[i] = mol[i].x;
-		x[i + nAtoms] = mol[i].y;
-		x[i + 2 * nAtoms] = mol[i].z;
-	}
-
-	return readQ_.getEnergy();
-}
-
 
 
 double Fitness::optimizeLennardJones(std::vector<double> &x, int fitType)

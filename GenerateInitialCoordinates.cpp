@@ -700,7 +700,7 @@ bool GenerateInitialCoordinates::generateElectronsAtCenter(
 
 	if (dymOptions_.initialPositionType == 0)
 	{
-		xPositions[6] = -xPositions[2];
+		xPositions[6] = -xPositions[4];
 		xPositions[11] = -xPositions[9];
 		vVelocities[6] = vVelocities[2];
 		vVelocities[11] = vVelocities[9];
