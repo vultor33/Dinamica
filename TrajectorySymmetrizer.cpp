@@ -45,8 +45,8 @@ void TrajectorySymmetrizer::symmetrize(int option,
 		x[10] = -x[8]; //zele2 -> -zele1
 		x[11] = -x[9]; //zpro2 -> -zpro1
 
-		v[2] = v[0]; //vxele2 -> -vxele1
-		v[3] = v[1]; //vxpro2 -> -vxpro1
+		v[2] = v[0]; //vxele2 -> vxele1
+		v[3] = v[1]; //vxpro2 -> vxpro1
 		v[6] = -v[4]; //vyele2 -> -vyele1
 		v[7] = -v[5]; //vypro2 -> -vypro1
 		v[10] = -v[8]; //vzele2 -> -vzele1

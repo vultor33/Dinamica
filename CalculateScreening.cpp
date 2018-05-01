@@ -193,11 +193,11 @@ void CalculateScreening::screenDynamicRearPure(int symmetricType, int initialPos
 
 void  CalculateScreening::calcOne()
 {
-	int symmetricType = 1;
-	int initialPositions = 0;
+	int symmetricType = 2;
+	int initialPositions = 1;
 	int iPro = 0;
-	int iEle = 3;
-	int iAngle = 65.0e0;
+	int iEle = 8;
+	int iAngle = 89.0e0;
 	int k = 0;
 
 	double rProton = (double)iPro * 0.1e0 + 0.5156992;
@@ -205,8 +205,9 @@ void  CalculateScreening::calcOne()
 
 	ReadDymInput readDym_;
 	readDym_.defineMethodSymmetries(symmetricType, initialPositions, rEle, rProton, iAngle);
-	readDym_.analyzePlot();
+	//readDym_.analyzePlot();
 	readDym_.addIToName(k);
+	readDym_.electronPlot();
 	k++;
 	DymOptions dymOptions_ = readDym_.getDymOptions();
 	srand(dymOptions_.seed);

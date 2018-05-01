@@ -741,7 +741,7 @@ void GenerateInitialCoordinates::initialVelocities(
 		//auxV1 = 0.0e0;
 		//auxV2 = vInitial;
 	}
-	double tanTeta = tan(dymOptions_.angle / 180.0e0);
+	double tanTeta = tan(auxMath_._pi * dymOptions_.angle / 180.0e0);
 	double tanSquare = tanTeta * tanTeta;
 	double mOneTanSqrt = mProton * (1.0e0 + tanSquare);
 
@@ -786,22 +786,15 @@ void GenerateInitialCoordinates::initialVelocities(
 	{
 		if (dymOptions_.symmetrize == 2)
 		{
-			vInitial = sqrt((mOneTanSqrt / (mOneTanSqrt + tanSquare)) * deltaEnergy);
+			vInitial = sqrt((mOneTanSqrt / (mOneTanSqrt + 1.0e0)) * deltaEnergy);
 			auxV1 = vInitial * sqrt(1.0e0 / (1 + tanSquare));
 			auxV2 = auxV1 * tanTeta;
-			VX = -(vInitial*tanTeta) / (mProton * sqrt(1.0e0 + tanSquare));
+			VX = -(vInitial) / (mProton * sqrt(1.0e0 + tanSquare));
 			v[1] = VX; //vpe
 		}
-		v[2] = auxV1; //vye
-		v[0] = auxV2; //vxe
+		v[0] = auxV1; //vxe
+		v[2] = auxV2; //vye
 	}
-
-
-	/*
-	excel
-	
-	
-	*/
 
 }
 
