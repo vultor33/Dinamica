@@ -10,6 +10,7 @@
 #include "Fitness.h"
 #include "TrajectorySymmetrizer.h"
 #include "FitnessCoulombOdeint.h"
+#include "OdeintSafeObeserver.h"
 
 typedef std::vector< double > state_type;
 typedef boost::numeric::odeint::runge_kutta_dopri5< double > stepper_type;
@@ -24,6 +25,7 @@ Integrator::Integrator()
 	integratorType = 0;
 	adaptativeError = 1.0e-12;
 	defaultTimeStep = 1.0e-3;
+	maxOdeintCounter = 1000;
 
 	rksParams.resize(19);
 	rksParams[0] = 0.095176255;
@@ -58,18 +60,14 @@ void Integrator::setAdditionalParams(
 	atomsCharge = atomsCharge_in;
 }
 
-void Integrator::setOptions(bool printEnergy_in, int symmetrize_in)
+void Integrator::setOptions(DymOptions &dymOptions_)
 {
-	//printEnergy = printEnergy_in;
-	if (printEnergy)
-	{
-		printEnergyFile_.open("printEnergyFile.csv");
-	}
-	symmetrize = symmetrize_in;
+	symmetrize = dymOptions_.symmetrize;
+	maxOdeintCounter = dymOptions_.iterationLoop * dymOptions_.printLoop;
 }
 
 
-void Integrator::odeintAdaptativeIntegrator(
+bool Integrator::odeintAdaptativeIntegrator(
 	std::vector<double> & xInitial,
 	std::vector<double> & vInitial,
 	double wholeTimeStep)
@@ -83,14 +81,27 @@ void Integrator::odeintAdaptativeIntegrator(
 		x[i + 12] = vInitial[i];
 	}
 
-	boost::numeric::odeint::integrate_adaptive(
-		boost::numeric::odeint::make_controlled< error_stepper_type >
-		(adaptativeError, adaptativeError), // error handling
-		function,                           // function
-		x,                                  // initial state
-		0.0e0,                              // initial time
-		wholeTimeStep,                      // end_time
-		defaultTimeStep);                   // delta time
+
+	write_state write;
+	CounterWrite counter(maxOdeintCounter);
+	write.counter = &counter;
+
+	try 
+	{
+		boost::numeric::odeint::integrate_adaptive(
+			boost::numeric::odeint::make_controlled< error_stepper_type >
+			(adaptativeError, adaptativeError), // error handling
+			function,                           // function
+			x,                                  // initial state
+			0.0e0,                              // initial time
+			wholeTimeStep,                      // end_time
+			defaultTimeStep,                    // delta time
+			write);                             // observar - limit operations
+	}
+	catch(int)
+	{
+		return false;
+	}
 
 	for (int i = 0; i < xInitial.size(); i++)
 	{
@@ -98,7 +109,7 @@ void Integrator::odeintAdaptativeIntegrator(
 		vInitial[i] = x[i + 12];
 	}
 
-	// adicionar simetrizacao aqui se for o caso.
+	return true;
 }
 
 
@@ -144,89 +155,6 @@ void Integrator::rungeKuttaSimetrico(
 	
 	symm_.symmetrize(symmetrize, xInitial, vInitial);
 
-	/*
-	if (symmetrize == 1) // inversion center
-	{
-		xInitial[2] = -xInitial[0];
-		xInitial[3] = -xInitial[1];
-		xInitial[6] = -xInitial[4];
-		xInitial[7] = -xInitial[5];
-		xInitial[10] = -xInitial[8];
-		xInitial[11] = -xInitial[9];
-		vInitial[2] = -vInitial[0];
-		vInitial[3] = -vInitial[1];
-		vInitial[6] = -vInitial[4];
-		vInitial[7] = -vInitial[5];
-		vInitial[10] = -vInitial[8];
-		vInitial[11] = -vInitial[9];
-	}
-	else if (symmetrize == 2) // LH2bl (x=0 ; z->-z; y->y)
-	{
-		xInitial[0] = 0.0e0;
-		xInitial[1] = 0.0e0;
-		xInitial[2] = 0.0e0;
-		xInitial[3] = 0.0e0;
-		xInitial[6] = xInitial[4];
-		xInitial[7] = xInitial[5];
-		xInitial[10] = -xInitial[8];
-		xInitial[11] = -xInitial[9];
-
-		vInitial[0] = 0.0e0;
-		vInitial[1] = 0.0e0;
-		vInitial[2] = 0.0e0;
-		vInitial[3] = 0.0e0;
-
-		vInitial[6] = vInitial[4];
-		vInitial[7] = vInitial[5];
-		vInitial[10] = -vInitial[8];
-		vInitial[11] = -vInitial[9];
-	}
-	else if (symmetrize == 3) // f-langmuirCenter
-	{
-		xInitial[2] = xInitial[0];
-		xInitial[6] = -xInitial[4];
-		xInitial[8] = 0.0e0;
-		xInitial[10] = 0.0e0;
-
-		vInitial[2] = vInitial[0];
-		vInitial[6] = -vInitial[4];
-		vInitial[8] = 0.0e0;
-		vInitial[10] = 0.0e0;
-
-		xInitial[3] = xInitial[1];
-		xInitial[5] = 0.0e0;
-		xInitial[7] = 0.0e0;
-		xInitial[11] = -xInitial[9];
-
-		vInitial[3] = vInitial[1];
-		vInitial[5] = 0.0e0;
-		vInitial[7] = 0.0e0;
-		vInitial[11] = -vInitial[9];
-	}
-	else if (symmetrize == 4) // g-langmuirCenter
-	{
-		xInitial[0] = 0.0e0;
-		xInitial[2] = 0.0e0;
-		xInitial[6] = -xInitial[4];
-		xInitial[10] = xInitial[8];
-
-		vInitial[0] = 0.0e0;
-		vInitial[2] = 0.0e0;
-		vInitial[6] = -vInitial[4];
-		vInitial[10] = vInitial[8];
-
-		xInitial[1] = 0.0e0;
-		xInitial[3] = 0.0e0;
-		xInitial[5] = 0.0e0;
-		xInitial[7] = 0.0e0;
-
-		vInitial[1] = 0.0e0;
-		vInitial[3] = 0.0e0;
-		vInitial[5] = 0.0e0;
-		vInitial[7] = 0.0e0;
-	}
-
-	*/
 }
 
 

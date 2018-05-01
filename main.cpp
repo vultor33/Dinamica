@@ -14,29 +14,25 @@ int main(int argc, char *argv[])
 
 		/*
 		Trajetorias com angulo zero removidas, fazer elas depois.
-		IMPORTANTE: trocar para runge kutta de passo variavel e monitorar a energia FINAL e INICIAL.
 		*/
 
 
 		//calScreen_.analyzeAll();
 
-		//calScreen_.screenDynamicCenter(1, 0);
-
-		//calScreen_.screenDynamicRear(2, 1);
-
-		//calScreen_.screenDynamicCenterPure(3, 0, 15.0e0);
-
-		//calScreen_.screenDynamicRearPure(2, 1, 15.0e0);
 
 
-		remove("simulationResults.csv");
-		ofstream excelResult_;
-		excelResult_.open("simulationResults.csv", std::ofstream::out | std::ofstream::app);
-		excelResult_ << "Simulation Name;Ltotal;Ltotal error;Etotal error;CMx final;CMy final;CMz final;rpp mean;amplitude;product code; product string" << endl;
-		excelResult_.close();
-
-
-		calScreen_.calcOne();
+		//RUNNING
+		//calScreen_.screenDynamicCenter(1, 0); // a-BH2a-BH2b
+		//calScreen_.screenDynamicCenter(2, 0); // b-LH2a-BH2b
+		//calScreen_.screenDynamicCenter(3, 0); // c-BH2a-LH2bl
+		//calScreen_.screenDynamicCenter(4, 0); // d-LH2a-LH2bl
+		calScreen_.screenDynamicRear(2, 1); //   e-BH2a-LH2b
+		//calScreen_.screenDynamicCenterPure(1, 0, 0.0e0);  // f-BH2a
+		//calScreen_.screenDynamicCenterPure(1, 0, 90.0e0);  // g-BH2b - center
+		//calScreen_.screenDynamicRearPure(1, 1, 90.0e0); // h-BH2b - rear
+		//calScreen_.screenDynamicCenterPure(2, 0, 0.0e0);  // i-LH2a
+		//calScreen_.screenDynamicCenterPure(3, 0, 90.0e0);  // j-LH2bl
+		//calScreen_.screenDynamicRearPure(2, 1, 0.0e0); // k-LH2b
 
 	}
 	return 0;

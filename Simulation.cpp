@@ -43,7 +43,7 @@ int Simulation::startSimulation()
 	// Options
 	Integrator rk_;
 	rk_.setAdditionalParams(atomsMass, atomsCharge);
-	rk_.setOptions(dymOptions_.printEnergy, dymOptions_.symmetrize);
+	rk_.setOptions(dymOptions_);
 	if (dymOptions_.printMovie)
 	{
 		remove(dymOptions_.outName.c_str());
@@ -67,9 +67,13 @@ int Simulation::startSimulation()
 	// SIMULATION
 	double initialEnergy = fit_.calculateTotalEnergyCoulomb(x,v,atomsCharge,atomsMass);
 	double initialAngularMomentum = fit_.calculateTotalAngularMomentum(x, v, atomsMass);
-	for (int i = 0; i < dymOptions_.printLoop; i++)
+	int iterations = 0;
+	bool integrateSucess = true;
+	while(iterations < dymOptions_.printLoop)
 	{
-		rk_.odeintAdaptativeIntegrator(x, v, dymOptions_.timeStep * dymOptions_.iterationLoop);
+		iterations++;
+
+		integrateSucess = rk_.odeintAdaptativeIntegrator(x, v, dymOptions_.timeStep * dymOptions_.iterationLoop);
 
 		/*
 		for (size_t i = 0; i < dymOptions_.iterationLoop; i++)
@@ -77,13 +81,9 @@ int Simulation::startSimulation()
 			rk_.rungeKuttaSimetrico(x, v, dymOptions_.timeStep);
 		}
 		*/
-
-		if (dymOptions_.checkStopSimulationConditions)
-			checkStopSimulation(x);
-		if (stopSimulation)
-		{
+		if (!integrateSucess)
 			break;
-		}
+
 		if (dymOptions_.printPosVel)
 			printSimulationInfo(x, v, atomsCharge, atomsMass, posVel_);
 
@@ -91,22 +91,35 @@ int Simulation::startSimulation()
 		{
 			printCoulombAtoms(x, dymOptions_.outName, atomsCharge);
 		}
+		if (dymOptions_.checkStopSimulationConditions)
+			checkStopSimulation(x);
+		if (stopSimulation)
+			break;
+		double middleEnergy = fit_.calculateTotalEnergyCoulomb(x, v, atomsCharge, atomsMass);
+		if (abs(middleEnergy - initialEnergy) > dymOptions_.toleranceForFinalEnergy)
+			break;
 	}
 
 	//PRINT RESULT SUMMARY
 	double finalEnergy = fit_.calculateTotalEnergyCoulomb(x, v, atomsCharge, atomsMass);
 	double finalAngularMomentum = fit_.calculateTotalAngularMomentum(x, v, atomsMass);
+	double errorEnergy = abs(finalEnergy - initialEnergy);
+
 	ofstream excelResult_;
 	excelResult_.open(dymOptions_.excelResultsName.c_str(), std::ofstream::out | std::ofstream::app);
-	excelResult_ << dymOptions_.outName << ";"
-		<< initialAngularMomentum << ";"
-		<< abs(finalAngularMomentum - initialAngularMomentum) / ((double)dymOptions_.printLoop) << ";"
-		<< abs(finalEnergy - initialEnergy) / ((double)dymOptions_.printLoop) << ";";
+	excelResult_ << dymOptions_.outName << ";";
+	if (errorEnergy > dymOptions_.toleranceForFinalEnergy)
+		excelResult_ << ";;;;;;;;;;;;;;;;;;ENERGY-FAILED;";
+	else if(!integrateSucess)
+		excelResult_ << ";;;;;;;;;;;;;;;;;;ODEINT-MAX-STEP-REACHED;";
+
+	excelResult_ << initialAngularMomentum << ";"
+		<< abs(finalAngularMomentum - initialAngularMomentum) / ((double)iterations) << ";"
+		<< errorEnergy / ((double)iterations) << ";";
 	fit_.printCenterOfMass(x, atomsMass, excelResult_);
 	excelResult_.close();
 
 	return 0;
-
 }
 
 void Simulation::additionalOptions(string flag, bool option)

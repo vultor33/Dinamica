@@ -18,6 +18,12 @@ CalculateScreening::~CalculateScreening(){}
 
 void CalculateScreening::screenDynamicCenter(int symmetricType, int initialPositions, int kOnly)
 {
+	remove("simulationResults.csv");
+	ofstream excelResult_;
+	excelResult_.open("simulationResults.csv", std::ofstream::out | std::ofstream::app);
+	excelResult_ << "Simulation Name;Ltotal;Ltotal error;Etotal error;CMx final;CMy final;CMz final;rpp mean;amplitude;product code; product string" << endl;
+	excelResult_.close();
+
 	
 	int k = 1;
 	for (int iEle = -6; iEle <= 8; iEle++)
@@ -63,6 +69,12 @@ void CalculateScreening::screenDynamicCenter(int symmetricType, int initialPosit
 
 void CalculateScreening::screenDynamicRear(int symmetricType, int initialPositions, int kOnly)
 {
+	remove("simulationResults.csv");
+	ofstream excelResult_;
+	excelResult_.open("simulationResults.csv", std::ofstream::out | std::ofstream::app);
+	excelResult_ << "Simulation Name;Ltotal;Ltotal error;Etotal error;CMx final;CMy final;CMz final;rpp mean;amplitude;product code; product string" << endl;
+	excelResult_.close();
+
 
 	int k = 1;
 	for (int iEle = -6; iEle <= 9; iEle++)
@@ -108,6 +120,12 @@ void CalculateScreening::screenDynamicRear(int symmetricType, int initialPositio
 
 void CalculateScreening::screenDynamicCenterPure(int symmetricType, int initialPositions, double iAngle, int kOnly)
 {
+	remove("simulationResults.csv");
+	ofstream excelResult_;
+	excelResult_.open("simulationResults.csv", std::ofstream::out | std::ofstream::app);
+	excelResult_ << "Simulation Name;Ltotal;Ltotal error;Etotal error;CMx final;CMy final;CMz final;rpp mean;amplitude;product code; product string" << endl;
+	excelResult_.close();
+
 	int k = 1;
 	for (int iEle = -6; iEle <= 8; iEle++)
 	{
@@ -151,6 +169,12 @@ void CalculateScreening::screenDynamicCenterPure(int symmetricType, int initialP
 
 void CalculateScreening::screenDynamicRearPure(int symmetricType, int initialPositions, double iAngle, int kOnly)
 {
+	remove("simulationResults.csv");
+	ofstream excelResult_;
+	excelResult_.open("simulationResults.csv", std::ofstream::out | std::ofstream::app);
+	excelResult_ << "Simulation Name;Ltotal;Ltotal error;Etotal error;CMx final;CMy final;CMz final;rpp mean;amplitude;product code; product string" << endl;
+	excelResult_.close();
+
 	int k = 1;
 	for (int iEle = -6; iEle <= 9; iEle++)
 	{
@@ -161,6 +185,7 @@ void CalculateScreening::screenDynamicRearPure(int symmetricType, int initialPos
 				k++;
 				continue;
 			}
+
 
 			double rProton = (double)iPro * 0.1e0 + 0.5156992e0;
 			double rEle = (double)iEle * 0.1e0 + rProton + 0.7e0;
@@ -197,7 +222,7 @@ void  CalculateScreening::calcOne()
 	int initialPositions = 0;
 	int iPro = 0;
 	int iEle = 0;
-	double iAngle = 15.0e0;
+	double iAngle = 90.0e0;
 	int k = 0;
 
 	double rProton = (double)iPro * 0.1e0 + 0.5156992;

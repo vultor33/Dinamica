@@ -6,6 +6,8 @@
 #include <fstream>
 
 #include "TrajectorySymmetrizer.h"
+#include "DynamicsStructs.h"
+
 
 class Integrator
 {
@@ -13,7 +15,7 @@ public:
 	Integrator();
 	~Integrator();
 
-	void odeintAdaptativeIntegrator(
+	bool odeintAdaptativeIntegrator(
 		std::vector<double> & xInitial,
 		std::vector<double> & vInitial,
 		double wholeTimeStep);
@@ -30,7 +32,7 @@ public:
 		std::vector<double> &atomsMass_in,
 		std::vector<double> &atomsCharge_in);
 
-	void setOptions(bool printEnergy_in, int symmetrize_in);
+	void setOptions(DymOptions &dymOptions);
 
 private:
 	int integratorType;
@@ -38,6 +40,7 @@ private:
 	int symmetrize;
 	double adaptativeError;
 	double defaultTimeStep;
+	int maxOdeintCounter;
 	std::vector<double> rksParams;
 	std::vector<double> atomsCharge;
 	std::vector<double> atomsMass;

@@ -2,9 +2,10 @@
 #ifndef FITNESSCOULOMBODEINT_H
 #define FITNESSCOULOMBODEINT_H
 
+#include <iostream>
+
 #include "Fitness.h"
 #include "TrajectorySymmetrizer.h"
-
 
 typedef std::vector< double > state_type;
 /* state_type:
@@ -17,7 +18,6 @@ vze1 - 20, vzp1 - 21, vze2 - 22, vzp2 - 23 */
 
 //typedef boost::numeric::odeint::runge_kutta_dopri5< double > stepper_type;
 //typedef boost::numeric::odeint::runge_kutta_cash_karp54< state_type > error_stepper_type;
-
 
 
 class FitnessCoulombOdeint

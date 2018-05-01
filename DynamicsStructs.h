@@ -17,6 +17,7 @@ struct DymOptions
 	int seed;
 	double maxStopSimulationDistance;
 	int symmetrize;
+	double toleranceForFinalEnergy;
 
 	//print options
 	bool checkStopSimulationConditions;
